@@ -1,0 +1,88 @@
+html {
+    image-rendering: pixelated;
+    --highlight-color: #88BABA;
+    --font-color: #3F88C8;
+    --dark-color: #512929;
+    --med-color: #D38433;
+    --light-color: #E6C25D;
+    font-family: "Monaco", "Lucida Console", monospace;
+}
+
+body {
+    background-color: black;
+    background-image: url("../images/box_tile.png");
+}
+
+.popup {
+    background-image: url("../images/box_panel_shred.png"), url("../images/box_panel.png");
+    background-position: right top, center top;
+    background-repeat: repeat-y, no-repeat;
+    background-size: 30vw, cover;
+    border-radius: 15px;
+    padding: 5vh 5vw;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: solid var(--dark-color) 1vh;
+    filter: drop-shadow(var(--dark-color) 0px 0px 10px);
+}
+
+.popupHeader {
+    color: var(--font-color);
+    -webkit-text-stroke: var(--dark-color) 1vh;
+    paint-order: stroke fill;
+    font-size: 10vh;
+    font-weight: bold;
+    padding-bottom: 5vh;
+}
+
+.popupSubheader {
+    color: var(--highlight-color);
+    -webkit-text-stroke: var(--dark-color) 1vh;
+    paint-order: stroke fill;
+    font-size: 5vh;
+    font-weight: bold;
+}
+
+input {
+    background-color: var(--light-color);
+    border: solid var(--med-color) 1vh;
+    filter: drop-shadow(var(--dark-color) 0px 0px 10px);
+    border-radius: 5px;
+    margin: 1vh auto;
+    padding: 1vh 1vw;
+    color: var(--highlight-color);
+    -webkit-text-stroke: var(--dark-color) 1vh;
+    paint-order: stroke fill;
+    font-size: 3vh;
+    font-weight: bold;
+    text-align: center;
+}
+
+button {
+    background-color: var(--highlight-color);
+    border: solid var(--font-color) 1vh;
+    filter: drop-shadow(var(--dark-color) 0px 0px 10px);
+    border-radius: 5px;
+    margin: 1vh auto;
+    padding: 1vh 1vw;
+    color: var(--dark-color);
+    font-size: 3vh;
+    font-weight: bold;
+    text-align: center;
+}
+
+button:hover {
+    background-color: var(--font-color);
+    border: solid var(--highlight-color) 1vh;
+    color: var(--light-color);
+    cursor: pointer;
+}
+
+#loginInfo {
+    width: 60vw;
+    height: 60vh;
+    text-align: left;
+}
