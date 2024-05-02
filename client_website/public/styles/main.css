@@ -10,11 +10,11 @@ html {
 
 body {
     background-color: black;
-    background-image: url("../images/box_tile.png");
+    background-image: url("../assets/box_tile.png");
 }
 
 .LHpopup {
-    background-image: url("../images/box_panel_shred_l.png"), url("../images/box_panel.png");
+    background-image: url("../assets/box_panel_shred_l.png"), url("../assets/box_panel.png");
     background-position: left top, center top;
     background-repeat: repeat-y, no-repeat;
     background-size: 30vw, cover;
@@ -33,7 +33,7 @@ body {
 }
 
 .RHpopup {
-    background-image: url("../images/box_panel_shred_r.png"), url("../images/box_panel.png");
+    background-image: url("../assets/box_panel_shred_r.png"), url("../assets/box_panel.png");
     background-position: right top, center top;
     background-repeat: repeat-y, no-repeat;
     background-size: 30vw, cover;
