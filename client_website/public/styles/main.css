@@ -13,8 +13,27 @@ body {
     background-image: url("../images/box_tile.png");
 }
 
-.popup {
-    background-image: url("../images/box_panel_shred.png"), url("../images/box_panel.png");
+.LHpopup {
+    background-image: url("../images/box_panel_shred_l.png"), url("../images/box_panel.png");
+    background-position: left top, center top;
+    background-repeat: repeat-y, no-repeat;
+    background-size: 30vw, cover;
+    border-radius: 15px;
+    padding: 5vh 5vw;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: solid var(--dark-color) 1vh;
+    filter: drop-shadow(var(--dark-color) 0px 0px 10px);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.RHpopup {
+    background-image: url("../images/box_panel_shred_r.png"), url("../images/box_panel.png");
     background-position: right top, center top;
     background-repeat: repeat-y, no-repeat;
     background-size: 30vw, cover;
@@ -27,13 +46,16 @@ body {
     transform: translate(-50%, -50%);
     border: solid var(--dark-color) 1vh;
     filter: drop-shadow(var(--dark-color) 0px 0px 10px);
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: column;
 }
 
 .popupHeader {
     color: var(--font-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
     paint-order: stroke fill;
-    font-size: 10vh;
+    font-size: clamp(2rem, 10vw, 5rem);
     font-weight: bold;
     padding-bottom: 5vh;
 }
@@ -42,8 +64,16 @@ body {
     color: var(--highlight-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
     paint-order: stroke fill;
-    font-size: 5vh;
+    font-size: clamp(1rem, 5vw, 2.5rem);
     font-weight: bold;
+}
+
+.entryGroup {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
 }
 
 input {
@@ -51,12 +81,13 @@ input {
     border: solid var(--med-color) 1vh;
     filter: drop-shadow(var(--dark-color) 0px 0px 10px);
     border-radius: 5px;
-    margin: 1vh auto;
+    margin: 2vh auto;
     padding: 1vh 1vw;
-    color: var(--highlight-color);
+    color: var(--font-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
     paint-order: stroke fill;
-    font-size: 3vh;
+    font-size: 5vh;
+    width: clamp(8rem, 30vw, 16rem);
     font-weight: bold;
     text-align: center;
 }
