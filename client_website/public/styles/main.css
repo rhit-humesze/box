@@ -53,6 +53,7 @@ body {
 
 .popupHeader {
     color: var(--font-color);
+    fill: var(--font-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
     stroke-linejoin: round;
     paint-order: stroke fill;
@@ -135,10 +136,4 @@ button:hover {
     border: solid var(--highlight-color) 1vh;
     color: var(--light-color);
     cursor: pointer;
-}
-
-#loginInfo {
-    width: 60vw;
-    height: 60vh;
-    text-align: left;
 }

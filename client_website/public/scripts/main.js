@@ -74,7 +74,7 @@ playerSetup = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
-            <div id="loginInfo" class="RHpopup">
+            <div class="RHpopup">
                 <div id="headerGroup">
                     <div class="popupHeader">Game found!</div>
                     <div class="popupSubheader">Please enter your name:</div>
