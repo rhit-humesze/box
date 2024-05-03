@@ -1,3 +1,5 @@
+var socket;
+
 // sound effects
 var click = new Audio('./assets/click.mp3');
 var unveil = new Audio('./assets/unveil.mp3');
@@ -27,28 +29,56 @@ htmlToElement = (html) => {
 
 // page for joining box lobby from code
 window.onload = () => {
-    document.getElementById("joinSession").onclick = (event) => {
+    document.getElementById("boxCode").onclick = () => {
         music_lightFunky.play();
+    };
+    document.getElementById("joinSession").onclick = (event) => {
         var boxCode = document.getElementById("boxCode").value;
+        if(boxCode == "") {
+            return;
+        }
         console.log(boxCode)
         click.play();
-        // TODO: send code to listing server and connect to box lobby
-        playerSetup();
+        // TODO: send lobby code to site server and connect to box lobby server
+        var serverLobby = "http://localhost:8000/"
+        socket = io();
+        socket.connect(`${serverLobby}`);
+        socket.on("connect_error", () => {
+            socket.close()
+            document.getElementById("boxCode").value = "";
+            var errorMsg = htmlToElement(`<div class="popupError">Box Code invalid! Try again.</div>`);
+            document.getElementById("headerGroup").appendChild(errorMsg);
+            setTimeout(() => errorMsg.style.opacity = '0', 1000);
+            setTimeout(() => errorMsg.remove(), 2000);
+            playerSetup();
+        });
+        socket.on("connect", () => {
+            playerSetup();
+        });
     }
 }
 
 // page for player setup on connected box lobby
 playerSetup = () => {
+    socket.on("connect_error", (error) => {
+        if (socket.active) {
+            // temporary failure, the socket will automatically try to reconnect
+        } else {
+            // the connection was denied by the server
+            console.log(error.message);
+        }
+    });
+    socket.on("connect", () => {});
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
             <div id="loginInfo" class="RHpopup">
-                <div>
+                <div id="headerGroup">
                     <div class="popupHeader">Game found!</div>
                     <div class="popupSubheader">Please enter your name:</div>
                 </div>
                 <div class="entryGroup">
-                    <input id="userName" maxlength="15" spellcheck="false" style='width: clamp(8rem, 50vw, 30rem) !important'>
+                    <input id="userName" maxlength="15" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
                     <button id="addPlayer">Join Box</button>
                 </div>
             </div>
@@ -57,6 +87,9 @@ playerSetup = () => {
     unveil.play()
     document.getElementById("addPlayer").onclick = (event) => {
         var userName = document.getElementById("userName").value;
+        if(userName == "") {
+            return;
+        }
         console.log(userName)
         click.play();
         // TODO: send username to box lobby server
