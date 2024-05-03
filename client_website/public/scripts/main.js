@@ -32,25 +32,29 @@ window.onload = () => {
     document.getElementById("boxCode").onclick = () => {
         music_lightFunky.play();
     };
+    var clickable = true
     document.getElementById("joinSession").onclick = (event) => {
         var boxCode = document.getElementById("boxCode").value;
-        if(boxCode == "") {
+        if(boxCode == "" || !clickable) {
             return;
         }
+        clickable = false;
         console.log(boxCode)
         click.play();
         // TODO: send lobby code to site server and connect to box lobby server
-        var serverLobby = "http://localhost:8000/"
+        var serverLobby = "http://127.0.0.1:5100/"
         socket = io();
         socket.connect(`${serverLobby}`);
         socket.on("connect_error", () => {
             socket.close()
+            clickable = true;
+            timesUp.play();
             document.getElementById("boxCode").value = "";
             var errorMsg = htmlToElement(`<div class="popupError">Box Code invalid! Try again.</div>`);
             document.getElementById("headerGroup").appendChild(errorMsg);
             setTimeout(() => errorMsg.style.opacity = '0', 1000);
             setTimeout(() => errorMsg.remove(), 2000);
-            playerSetup();
+            // playerSetup();
         });
         socket.on("connect", () => {
             playerSetup();
