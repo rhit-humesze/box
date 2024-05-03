@@ -43,8 +43,7 @@ window.onload = () => {
         click.play();
         // TODO: send lobby code to site server and connect to box lobby server
         var serverLobby = "http://127.0.0.1:5100/"
-        socket = io();
-        socket.connect(`${serverLobby}`);
+        socket = io.connect(`${serverLobby}`);
         socket.on("connect_error", () => {
             socket.close()
             clickable = true;
@@ -54,7 +53,6 @@ window.onload = () => {
             document.getElementById("headerGroup").appendChild(errorMsg);
             setTimeout(() => errorMsg.style.opacity = '0', 1000);
             setTimeout(() => errorMsg.remove(), 2000);
-            // playerSetup();
         });
         socket.on("connect", () => {
             playerSetup();
