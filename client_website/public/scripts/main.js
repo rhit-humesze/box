@@ -95,6 +95,7 @@ playerSetup = () => {
         console.log(userName)
         click.play();
         // TODO: send username to box lobby server
+        socket.emit("userName", userName);
         boxLobby();
     }
 }

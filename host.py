@@ -15,6 +15,10 @@ def connect(sid, environ):
 @sio.event
 def disconnect(sid):
     print('disconnect ', sid)
+    
+@sio.on("userName")
+def newUser(sid, data):
+    print(data)
 
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5100)), app)
