@@ -20,9 +20,9 @@ class Game:
 
 
     def generate_code(self):
-        '''generates a random 6-digit alphanumeric code'''
+        '''generates a random 4-digit alphanumeric code'''
         characters = string.ascii_letters + string.digits
-        return ''.join(random.choice(characters) for _ in range(6))
+        return ''.join(random.choice(characters) for _ in range(4))
         
 
     def handle_events(self):
@@ -43,15 +43,15 @@ class Game:
     def add_player(self, name: str):
         self.players.append(name)
 
+
     def game_loop(self):
         '''main loop for the game screen'''
         self.running = True
 
         while self.running:
             self.screen.fill(pygame.Color('white'))
-
             self.handle_events()
-
+            
             if self.game_state == 'start-screen':
                 pygame.draw.rect(self.screen, pygame.Color('black'), (self.WIDTH / 2 - 50, self.HEIGHT / 2 - 25, 100, 50))
                 start_text = self.font.render("START", True, pygame.Color('white'))
@@ -67,13 +67,13 @@ class Game:
                     player_text = self.font.render(player, True, pygame.Color('black'))
                     player_rect = player_text.get_rect(center=(self.WIDTH // 2, 100 + i * 30))
                     self.screen.blit(player_text, player_rect)
+                
             pygame.display.flip()
 
         pygame.quit()
         sys.exit()
 
 
-
-# if __name__ == "__main__":
-#     game = Game()
-#     game.game_loop()
+if __name__ == "__main__":
+    game = Game()
+    game.game_loop()

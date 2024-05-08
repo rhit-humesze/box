@@ -19,6 +19,8 @@ body {
     background-repeat: repeat-y, no-repeat;
     background-size: 30vw, cover;
     border-radius: 15px;
+    min-width: 60vw;
+    min-height: 60vh;
     padding: 5vh 5vw;
     margin: 0;
     position: absolute;
@@ -38,6 +40,8 @@ body {
     background-repeat: repeat-y, no-repeat;
     background-size: 30vw, cover;
     border-radius: 15px;
+    min-width: 60vw;
+    min-height: 60vh;
     padding: 5vh 5vw;
     margin: 0;
     position: absolute;
@@ -53,7 +57,9 @@ body {
 
 .popupHeader {
     color: var(--font-color);
+    fill: var(--font-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
+    stroke-linejoin: round;
     paint-order: stroke fill;
     font-size: clamp(2rem, 10vw, 5rem);
     font-weight: bold;
@@ -63,6 +69,7 @@ body {
 .popupSubheader {
     color: var(--highlight-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
+    stroke-linejoin: round;
     paint-order: stroke fill;
     font-size: clamp(1rem, 5vw, 2.5rem);
     font-weight: bold;
@@ -72,6 +79,7 @@ body {
 .popupError {
     color: red;
     -webkit-text-stroke: var(--dark-color) 1vh;
+    stroke-linejoin: round;
     paint-order: stroke fill;
     font-size: clamp(1rem, 5vw, 2.5rem);
     font-weight: bold;
@@ -98,6 +106,7 @@ input {
     padding: 1vh 1vw;
     color: var(--font-color);
     -webkit-text-stroke: var(--dark-color) 1vh;
+    stroke-linejoin: round;
     paint-order: stroke fill;
     font-size: 5vh;
     width: clamp(8rem, 30vw, 16rem);
@@ -108,6 +117,7 @@ input {
 input::placeholder {
     color: var(--med-color);
     -webkit-text-stroke: var(--dark-color) 0px;
+    stroke-linejoin: round;
     font-size: 2vh;
     opacity: 0.5;
 }
@@ -130,10 +140,4 @@ button:hover {
     border: solid var(--highlight-color) 1vh;
     color: var(--light-color);
     cursor: pointer;
-}
-
-#loginInfo {
-    width: 60vw;
-    height: 60vh;
-    text-align: left;
 }

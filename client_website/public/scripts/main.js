@@ -5,20 +5,6 @@ var click = new Audio('./assets/click.mp3');
 var unveil = new Audio('./assets/unveil.mp3');
 var timesUp = new Audio('./assets/times_up.mp3');
 
-// music tracks
-var music_lightFunky = new Audio('./assets/music_light_funky.mp3');
-music_lightFunky.loop = true;
-music_lightFunky.volume = 0.1;
-var music_heavyFunky = new Audio('./assets/music_heavy_funky.mp3');
-music_heavyFunky.loop = true;
-music_heavyFunky.volume = 0.1;
-var music_lightElectric = new Audio('./assets/music_light_electric.mp3');
-music_lightElectric.loop = true;
-music_lightElectric.volume = 0.1;
-var music_heavyElectric = new Audio('./assets/music_heavy_electric.mp3');
-music_heavyElectric.loop = true;
-music_heavyElectric.volume = 0.1;
-
 // helper function to convert text to html elements
 htmlToElement = (html) => {
 	var template = document.createElement("template");
@@ -29,30 +15,41 @@ htmlToElement = (html) => {
 
 // page for joining box lobby from code
 window.onload = () => {
-    document.getElementById("boxCode").onclick = () => {
-        music_lightFunky.play();
-    };
-    document.getElementById("joinSession").onclick = (event) => {
+    var clickable = true
+    document.getElementById("joinSession").onclick = () => {
         var boxCode = document.getElementById("boxCode").value;
-        if(boxCode == "") {
+        if(boxCode == "" || !clickable) {
             return;
         }
+        clickable = false;
         console.log(boxCode)
         click.play();
-        // TODO: send lobby code to site server and connect to box lobby server
-        var serverLobby = "http://localhost:8000/"
-        socket = io();
-        socket.connect(`${serverLobby}`);
+        var serverLobby = "http://127.0.0.1:5100/"
+        socket = io.connect(`${serverLobby}`);
         socket.on("connect_error", () => {
             socket.close()
+            clickable = true;
+            timesUp.play();
             document.getElementById("boxCode").value = "";
             var errorMsg = htmlToElement(`<div class="popupError">Box Code invalid! Try again.</div>`);
             document.getElementById("headerGroup").appendChild(errorMsg);
             setTimeout(() => errorMsg.style.opacity = '0', 1000);
             setTimeout(() => errorMsg.remove(), 2000);
-            playerSetup();
         });
         socket.on("connect", () => {
+            socket.emit("gameCode", boxCode);
+        });
+        socket.on("codeDenied", () => {
+            socket.close()
+            clickable = true;
+            timesUp.play();
+            document.getElementById("boxCode").value = "";
+            var errorMsg = htmlToElement(`<div class="popupError">Box Code invalid! Try again.</div>`);
+            document.getElementById("headerGroup").appendChild(errorMsg);
+            setTimeout(() => errorMsg.style.opacity = '0', 1000);
+            setTimeout(() => errorMsg.remove(), 2000);
+        });
+        socket.on("codeAccepted", () => {
             playerSetup();
         });
     }
@@ -72,7 +69,7 @@ playerSetup = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
-            <div id="loginInfo" class="RHpopup">
+            <div class="RHpopup">
                 <div id="headerGroup">
                     <div class="popupHeader">Game found!</div>
                     <div class="popupSubheader">Please enter your name:</div>
@@ -93,6 +90,7 @@ playerSetup = () => {
         console.log(userName)
         click.play();
         // TODO: send username to box lobby server
+        socket.emit("userName", userName);
         boxLobby();
     }
 }
@@ -105,7 +103,5 @@ boxLobby = () => {
         </div>`);
     document.querySelector('body').appendChild(setupPage);
     unveil.play()
-    music_lightFunky.pause();
-    music_heavyFunky.play();
     // TODO: fill page content from box lobby game stuff
 }
