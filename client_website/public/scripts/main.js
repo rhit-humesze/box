@@ -5,20 +5,6 @@ var click = new Audio('./assets/click.mp3');
 var unveil = new Audio('./assets/unveil.mp3');
 var timesUp = new Audio('./assets/times_up.mp3');
 
-// music tracks
-var music_lightFunky = new Audio('./assets/music_light_funky.mp3');
-music_lightFunky.loop = true;
-music_lightFunky.volume = 0.1;
-var music_heavyFunky = new Audio('./assets/music_heavy_funky.mp3');
-music_heavyFunky.loop = true;
-music_heavyFunky.volume = 0.1;
-var music_lightElectric = new Audio('./assets/music_light_electric.mp3');
-music_lightElectric.loop = true;
-music_lightElectric.volume = 0.1;
-var music_heavyElectric = new Audio('./assets/music_heavy_electric.mp3');
-music_heavyElectric.loop = true;
-music_heavyElectric.volume = 0.1;
-
 // helper function to convert text to html elements
 htmlToElement = (html) => {
 	var template = document.createElement("template");
@@ -29,9 +15,6 @@ htmlToElement = (html) => {
 
 // page for joining box lobby from code
 window.onload = () => {
-    document.getElementById("boxCode").onclick = () => {
-        music_lightFunky.play();
-    };
     var clickable = true
     document.getElementById("joinSession").onclick = () => {
         var boxCode = document.getElementById("boxCode").value;
@@ -120,7 +103,5 @@ boxLobby = () => {
         </div>`);
     document.querySelector('body').appendChild(setupPage);
     unveil.play()
-    music_lightFunky.pause();
-    music_heavyFunky.play();
     // TODO: fill page content from box lobby game stuff
 }
