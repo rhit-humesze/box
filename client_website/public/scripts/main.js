@@ -33,7 +33,7 @@ window.onload = () => {
         music_lightFunky.play();
     };
     var clickable = true
-    document.getElementById("joinSession").onclick = (event) => {
+    document.getElementById("joinSession").onclick = () => {
         var boxCode = document.getElementById("boxCode").value;
         if(boxCode == "" || !clickable) {
             return;
@@ -41,7 +41,6 @@ window.onload = () => {
         clickable = false;
         console.log(boxCode)
         click.play();
-        // TODO: send lobby code to site server and connect to box lobby server
         var serverLobby = "http://127.0.0.1:5100/"
         socket = io.connect(`${serverLobby}`);
         socket.on("connect_error", () => {
@@ -55,6 +54,19 @@ window.onload = () => {
             setTimeout(() => errorMsg.remove(), 2000);
         });
         socket.on("connect", () => {
+            socket.emit("gameCode", boxCode);
+        });
+        socket.on("codeDenied", () => {
+            socket.close()
+            clickable = true;
+            timesUp.play();
+            document.getElementById("boxCode").value = "";
+            var errorMsg = htmlToElement(`<div class="popupError">Box Code invalid! Try again.</div>`);
+            document.getElementById("headerGroup").appendChild(errorMsg);
+            setTimeout(() => errorMsg.style.opacity = '0', 1000);
+            setTimeout(() => errorMsg.remove(), 2000);
+        });
+        socket.on("codeAccepted", () => {
             playerSetup();
         });
     }

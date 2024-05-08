@@ -4,24 +4,52 @@ import socket
 import sys
 import eventlet
 import socketio
+import random
+import string
 
 sio = socketio.Server(cors_allowed_origins="*")
 app = socketio.WSGIApp(sio)
 
+gameCode = ""
+players = dict()
+
+def printServerInfo():
+    print(f"\nBox code: {gameCode}\n")
+    print(f"Players: {list(players.values())}")
+
 @sio.event
 def connect(sid, environ):
-    print('[INFO] Connect to client', sid)
+    print(f"New client {sid} connected.")
+    players[sid] = f"Player {len(players) + 1}"
+    printServerInfo()
 
 @sio.event
 def disconnect(sid):
-    print('disconnect ', sid)
+    print(f"Client {sid} ({players[sid]}) disconnected.")
+    del players[sid]
+    printServerInfo()
+
+@sio.on("gameCode")
+def checkCode(sid, data):
+    print(f"Received game code {data} from connected client {sid}.")
+    if(data == gameCode):
+        sio.emit("codeAccepted", room=sid)
+        print(f"Client {sid} code accepted.")
+        printServerInfo()
+    else:
+        sio.emit("codeDenied", room=sid)
+        print(f"Client {sid} code denied.")
     
 @sio.on("userName")
 def newUser(sid, data):
-    print(data)
+    print(f"Client {sid} player name set to {data}.")
+    players[sid] = data
+    printServerInfo()
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5100)), app)
+    gameCode = ''.join(random.choices(string.ascii_uppercase, k=4))
+    print(f"\nBox code: {gameCode}\n")
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5100)), app, log_output=False)
 
 # MAX_CONNECTIONS = 20
 
