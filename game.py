@@ -2,6 +2,8 @@ import pygame
 import random
 import sys
 import string
+from queue import Queue
+
 from host import Host
 
 highlightColor = "#88BABA"
@@ -13,7 +15,7 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, width=1200, height=800):
+    def __init__(self, code, message_queue: Queue, width=1200, height=800):
         '''initialize Game'''
         pygame.init()
         self.WIDTH:  int = width
@@ -22,9 +24,11 @@ class Game:
         pygame.display.set_caption("Box")
         self.game_state: str = 'start-screen'
         self.running = False
-        self.code = ''
+        self.code = code
         self.players = []
         self._circle_cache = {}
+
+        self.message_queue = message_queue
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
@@ -66,12 +70,6 @@ class Game:
 
         surf.blit(textsurface, (outlinewidth, outlinewidth))
         return surf
-    
-    def generate_code(self):
-        '''generates a random 4-digit alphanumeric code'''
-        characters = string.ascii_letters + string.digits
-        return ''.join(random.choice(characters) for _ in range(4))
-        
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -81,8 +79,9 @@ class Game:
                     if self.game_state == 'start-screen':
                         mouse_x, mouse_y = pygame.mouse.get_pos()
                         if self.WIDTH / 2 - 60 <= mouse_x <= self.WIDTH / 2 + 60 and self.HEIGHT / 2 - 35 <= mouse_y <= self.HEIGHT / 2 + 35:
-                            self.code = self.generate_code()
                             self.game_state = 'code-screen'
+                    elif self.game_state == 'code-screen':
+                        pass
                     else:
                         #for future
                         pass
@@ -122,6 +121,9 @@ class Game:
                 
             pygame.display.flip()
 
+        self.stop()
+
+    def stop(self):
         pygame.quit()
         sys.exit()
 
@@ -138,7 +140,3 @@ class Game:
         panelBg = pygame.image.load(assetPath + 'box_panel.png')
         panelBg = pygame.transform.scale(panelBg, (width + xpos, height + ypos))
         self.screen.blit(panelBg, (xpos + outlinewidth, ypos + outlinewidth), (xpos + outlinewidth, ypos + outlinewidth, width - 2 * outlinewidth, height - 2 * outlinewidth))
-
-# if __name__ == "__main__":
-#     game = Game()
-#     game.game_loop()
