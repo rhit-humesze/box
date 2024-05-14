@@ -15,7 +15,7 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, code, message_queue: Queue, width=1200, height=800):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, width=1200, height=800):
         '''initialize Game'''
         pygame.init()
         self.WIDTH:  int = width
@@ -25,10 +25,11 @@ class Game:
         self.game_state: str = 'start-screen'
         self.running = False
         self.code = code
-        self.players = []
+        self.players = {}
         self._circle_cache = {}
 
-        self.message_queue = message_queue
+        self.join_q = join_q
+        self.disc_q = disc_q
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
@@ -86,10 +87,17 @@ class Game:
                         #for future
                         pass
 
+    def recv_players(self):
+        '''get player names from the message queue and add them'''
+        while not self.join_q.empty():
+            player_dict_entry = self.join_q.get()
+            self.players.update(player_dict_entry)
 
-    def add_player(self, name: str):
-        self.players.append(name)
-
+    def check_disc_players(self):
+        '''checks if a player has disconnected and removes them'''
+        while not self.disc_q.empty():
+            sid = self.disc_q.get()
+            self.players.pop(sid)
 
     def game_loop(self):
         '''main loop for the game screen'''
@@ -109,14 +117,16 @@ class Game:
                 self.screen.blit(start_text, start_rect)
             elif self.game_state == 'code-screen':
                 self.createPanelBg(40, 40, self.WIDTH - 80, self.HEIGHT - 80, 10)
+                self.recv_players()
+                self.check_disc_players()
                 # Display generated code
                 text = self.renderText("Box code: " + self.code, fontColor, 64, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH // 2, 100))
                 self.screen.blit(text, text_rect)
                 
-                for i, player in enumerate(self.players):
-                    player_text = self.renderText(player, fontColor, 48, darkColor, 3)
-                    player_rect = player_text.get_rect(center=(self.WIDTH // 2, 100 + i * 30))
+                for idx, (sid, player_name) in enumerate(self.players.items()):
+                    player_text = self.renderText(player_name, fontColor, 48, darkColor, 3)
+                    player_rect = player_text.get_rect(center=(self.WIDTH // 2, 100 + idx * 30))
                     self.screen.blit(player_text, player_rect)
                 
             pygame.display.flip()
