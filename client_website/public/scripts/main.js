@@ -75,7 +75,7 @@ playerSetup = () => {
                     <div class="popupSubheader">Please enter your name:</div>
                 </div>
                 <div class="entryGroup">
-                    <input id="userName" maxlength="15" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
+                    <input id="userName" maxlength="12" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
                     <button id="addPlayer">Join Box</button>
                 </div>
             </div>

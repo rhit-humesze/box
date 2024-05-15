@@ -120,14 +120,41 @@ class Game:
                 self.recv_players()
                 self.check_disc_players()
                 # Display generated code
-                text = self.renderText("Box code: " + self.code, fontColor, 64, darkColor, 3)
-                text_rect = text.get_rect(center=(self.WIDTH // 2, 100))
+                text = self.renderText("Box code: " + self.code, fontColor, 48, darkColor, 3)
+                text_rect = text.get_rect(topleft=(120,100))
                 self.screen.blit(text, text_rect)
-                
+                # Check here if len players >= 3
+                if len(self.players) < 3:
+                    text = self.renderText("You need at least 3 players to start!", fontColor, 28, darkColor, 3)
+                    text_rect = text.get_rect(topleft=(120,150))
+                    self.screen.blit(text, text_rect)
+                else:
+                    #make start button visible
+                    pass
+                text = self.renderText("Players:", fontColor, 42, darkColor, 3)
+                text_rect = text.get_rect(topleft=(120, 180))
+                self.screen.blit(text, text_rect)
+
+                HORIZONTAL_SPACING = 100  # Adjust as needed
+                VERTICAL_SPACING = 40  # Adjust as needed
+                TOP_MARGIN = 220  # Starting y position
+                LEFT_MARGIN = 120  # Starting x position
+                x_pos = LEFT_MARGIN
+                y_pos = TOP_MARGIN
+                row = 0
                 for idx, (sid, player_name) in enumerate(self.players.items()):
-                    player_text = self.renderText(player_name, fontColor, 48, darkColor, 3)
-                    player_rect = player_text.get_rect(center=(self.WIDTH // 2, 100 + idx * 30))
+                    player_text = self.renderText(player_name, fontColor, 32, darkColor, 3)
+                    player_rect = player_text.get_rect()
+
+                    if x_pos + player_rect.width > self.WIDTH - LEFT_MARGIN:
+                        row += 1
+                        x_pos = LEFT_MARGIN
+                        y_pos = TOP_MARGIN + row * VERTICAL_SPACING
+
+                    player_rect.topleft = (x_pos, y_pos)
+                    
                     self.screen.blit(player_text, player_rect)
+                    x_pos += player_rect.width + HORIZONTAL_SPACING
                 
             pygame.display.flip()
 
