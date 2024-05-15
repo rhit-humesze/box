@@ -3,7 +3,7 @@ import random
 import sys
 import string
 from queue import Queue
-
+from typing import Tuple
 from host import Host
 
 highlightColor = "#88BABA"
@@ -89,7 +89,7 @@ class Game:
                         #for future
                         pass
 
-    def check_within_bounds(self, coords:tuple[float, float], width_height: tuple[float, float], posx, posy, method: str) -> bool:
+    def check_within_bounds(self, coords: Tuple[float, float], width_height: Tuple[float, float], posx, posy, method: str) -> bool:
         '''checks whether floats x and y are within given bounds. 'method' specifies if the provided coords are the center of the bounding box or the top left.'''
         width=width_height[0]
         height=width_height[1]
@@ -106,7 +106,7 @@ class Game:
         return cx - width / 2 <= posx <= cx + width / 2 and cy - height / 2 <= posy <= cy + height / 2 
 
 
-    def create_button(self, coords: tuple[float, float], width_height: tuple[float, float], text="", 
+    def create_button(self, coords: Tuple[float, float], width_height: Tuple[float, float], text="", 
                       btn_color=highlightColor, highlight_color=darkColor, text_color=fontColor, text_highlight=darkColor, 
                       method="topleft", font_size=32):
         '''draws button rectangles at specified coordinates'''
