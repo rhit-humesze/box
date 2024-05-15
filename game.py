@@ -77,13 +77,14 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
                     if self.game_state == 'start-screen':
-                        mouse_x, mouse_y = pygame.mouse.get_pos()
                         #start page button bounds check
                         if self.check_within_bounds((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'code-screen'
                     elif self.game_state == 'code-screen':
-                        pass
+                        if len(self.players) >= 3 and self.check_within_bounds((800,100),(280,120), mouse_x, mouse_y, "topleft"):
+                            print("sup chungie")
                     else:
                         #for future
                         pass
@@ -106,12 +107,12 @@ class Game:
 
 
     def create_button(self, coords: tuple[float, float], width_height: tuple[float, float], text="", 
-                      btn_color=highlightColor, highlight_color=fontColor, text_color=darkColor, text_highlight=fontColor, 
+                      btn_color=highlightColor, highlight_color=darkColor, text_color=fontColor, text_highlight=darkColor, 
                       method="topleft", font_size=32):
         '''draws button rectangles at specified coordinates'''
         if method == "topleft":
             center = (coords[0] + width_height[0] / 2, coords[1] + width_height[1] / 2)
-            inner_rec = pygame.Rect((coords[0] + 10, coords[1] + 10), (width_height[0] - 20, width_height[1] - 20))
+            inner_rec = pygame.Rect((coords[0] + 5, coords[1] + 5), (width_height[0] - 10, width_height[1] - 10))
             outer_rec = pygame.Rect(coords, width_height)
             pygame.draw.rect(self.screen, highlight_color, outer_rec)
             pygame.draw.rect(self.screen, btn_color, inner_rec)
@@ -120,7 +121,7 @@ class Game:
             self.screen.blit(temp_text, temp_rect)
         elif method == "center":
             topleft = (coords[0] - width_height[0] / 2, coords[1] - width_height[1] / 2)
-            inner_rec = pygame.Rect((topleft[0] + 10, topleft[1] + 10), (width_height[0] - 20, width_height[1] - 20))
+            inner_rec = pygame.Rect((topleft[0] + 5, topleft[1] + 5), (width_height[0] - 10, width_height[1] - 10))
             outer_rec = pygame.Rect(topleft, width_height)
             pygame.draw.rect(self.screen, btn_color, inner_rec)
             pygame.draw.rect(self.screen, highlight_color, outer_rec)
