@@ -84,7 +84,7 @@ class Game:
                             self.game_state = 'code-screen'
                     elif self.game_state == 'code-screen':
                         if len(self.players) >= 3 and self.check_within_bounds((800,100),(280,120), mouse_x, mouse_y, "topleft"):
-                            print("sup chungie")
+                            self.game_state = 'select-screen'
                     else:
                         #for future
                         pass
@@ -123,8 +123,8 @@ class Game:
             topleft = (coords[0] - width_height[0] / 2, coords[1] - width_height[1] / 2)
             inner_rec = pygame.Rect((topleft[0] + 5, topleft[1] + 5), (width_height[0] - 10, width_height[1] - 10))
             outer_rec = pygame.Rect(topleft, width_height)
-            pygame.draw.rect(self.screen, btn_color, inner_rec)
             pygame.draw.rect(self.screen, highlight_color, outer_rec)
+            pygame.draw.rect(self.screen, btn_color, inner_rec)
             temp_text = self.renderText(text, text_color, font_size, text_highlight, 2)
             temp_rect = temp_text.get_rect(center=coords)
             self.screen.blit(temp_text, temp_rect)
@@ -153,7 +153,9 @@ class Game:
             # create background image tiling
             self.fillWindowBg()
             self.handle_events()
-            
+            ### DEBUGGING PURPOSES ###
+            # self.game_state = 'select-screen'
+
             if self.game_state == 'start-screen':
                 self.create_button((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), text="START")
             elif self.game_state == 'code-screen':
@@ -196,7 +198,10 @@ class Game:
                     
                     self.screen.blit(player_text, player_rect)
                     x_pos += player_rect.width + horizontal_spacing
-                
+            elif self.game_state == 'select-screen':
+                self.create_button((200,400),(280,80),text="Placeholder 1", method="center",font_size=32)
+                self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
+                self.create_button((1000,400),(280,80),text="Placeholder 3", method="center",font_size=32)
             pygame.display.flip()
 
         self.stop()
