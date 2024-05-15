@@ -75,7 +75,7 @@ playerSetup = () => {
                     <div class="popupSubheader">Please enter your name:</div>
                 </div>
                 <div class="entryGroup">
-                    <input id="userName" maxlength="15" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
+                    <input id="userName" maxlength="12" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
                     <button id="addPlayer">Join Box</button>
                 </div>
             </div>
@@ -98,10 +98,18 @@ playerSetup = () => {
 // page for playing games within box lobby
 boxLobby = () => {
     document.querySelector('#pageContent').remove();
+    // var setupPage = htmlToElement(
+    //     `<div id="pageContent">
+    //     </div>`);
     var setupPage = htmlToElement(
         `<div id="pageContent">
+            <div class="RHpopup">
+                <div id="headerGroup">
+                    <div class="popupHeader">You're in!</div>
+                    <div class="popupSubheader">Please wait for the host to start.</div>
+                </div>
+            </div>
         </div>`);
     document.querySelector('body').appendChild(setupPage);
-    unveil.play()
-    // TODO: fill page content from box lobby game stuff
+    unveil.play();
 }
