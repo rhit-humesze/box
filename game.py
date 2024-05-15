@@ -154,11 +154,6 @@ class Game:
             self.handle_events()
             
             if self.game_state == 'start-screen':
-                # pygame.draw.rect(self.screen, pygame.Color(fontColor), (self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35, 120, 70))
-                # pygame.draw.rect(self.screen, pygame.Color(highlightColor), (self.WIDTH / 2 - 50, self.HEIGHT / 2 - 25, 100, 50))
-                # start_text = self.renderText("START", darkColor, 32, fontColor, 2)
-                # start_rect = start_text.get_rect(center=(self.WIDTH // 2, self.HEIGHT // 2))
-                # self.screen.blit(start_text, start_rect)
                 self.create_button((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), text="START")
             elif self.game_state == 'code-screen':
                 self.createPanelBg(40, 40, self.WIDTH - 80, self.HEIGHT - 80, 10)
@@ -173,41 +168,33 @@ class Game:
                     text = self.renderText("You need at least 3 players to start!", fontColor, 28, darkColor, 3)
                     text_rect = text.get_rect(topleft=(120,150))
                     self.screen.blit(text, text_rect)
-                    
-                    self.create_button((800,100),(280,120))
-                    # button_rect_2 = pygame.Rect((790,90), (300, 140))
-                    # pygame.draw.rect(self.screen, pygame.Color(highlightColor), button_rect_2)
-                    # button_rect_1 = pygame.Rect((800,100), (280, 120))
-                    # pygame.draw.rect(self.screen, pygame.Color(fontColor), button_rect_1)
                 else:
-                    # button_rect_1 = pygame.Rect((800,100), (100, 200))
-                    # pygame.draw.rect(self.screen, pygame.Color(fontColor), button_rect_1)
-                    # pygame.draw.rect(self.screen, pygame.Color(highlightColor), (self.WIDTH / 2 - 50, self.HEIGHT / 2 - 25, 100, 50))
-                    pass
+                    self.create_button((800,100),(280,120),text="Start game", font_size=42)
                 text = self.renderText("Players:", fontColor, 42, darkColor, 3)
                 text_rect = text.get_rect(topleft=(120, 180))
                 self.screen.blit(text, text_rect)
-
-                HORIZONTAL_SPACING = 100  # Adjust as needed
-                VERTICAL_SPACING = 40  # Adjust as needed
-                TOP_MARGIN = 230  # Starting y position
-                LEFT_MARGIN = 120  # Starting x position
-                x_pos = LEFT_MARGIN
-                y_pos = TOP_MARGIN
+                
+                #player stuff
+                horizontal_spacing = 100 
+                vertical_spacing = 40 
+                top_margin = 230  
+                left_margin = 120  
+                x_pos = left_margin
+                y_pos = top_margin
                 row = 0
                 for idx, (sid, player_name) in enumerate(self.players.items()):
                     player_text = self.renderText(player_name, fontColor, 32, darkColor, 3)
                     player_rect = player_text.get_rect()
 
-                    if x_pos + player_rect.width > self.WIDTH - LEFT_MARGIN:
+                    if x_pos + player_rect.width > self.WIDTH - left_margin:
                         row += 1
-                        x_pos = LEFT_MARGIN
-                        y_pos = TOP_MARGIN + row * VERTICAL_SPACING
+                        x_pos = left_margin
+                        y_pos = top_margin + row * vertical_spacing
 
                     player_rect.topleft = (x_pos, y_pos)
                     
                     self.screen.blit(player_text, player_rect)
-                    x_pos += player_rect.width + HORIZONTAL_SPACING
+                    x_pos += player_rect.width + horizontal_spacing
                 
             pygame.display.flip()
 
