@@ -79,13 +79,58 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.game_state == 'start-screen':
                         mouse_x, mouse_y = pygame.mouse.get_pos()
-                        if self.WIDTH / 2 - 60 <= mouse_x <= self.WIDTH / 2 + 60 and self.HEIGHT / 2 - 35 <= mouse_y <= self.HEIGHT / 2 + 35:
+                        #start page button bounds check
+                        if self.check_within_bounds((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'code-screen'
                     elif self.game_state == 'code-screen':
                         pass
                     else:
                         #for future
                         pass
+
+    def check_within_bounds(self, coords:tuple[float, float], width_height: tuple[float, float], posx, posy, method: str) -> bool:
+        '''checks whether floats x and y are within given bounds. 'method' specifies if the provided coords are the center of the bounding box or the top left.'''
+        width=width_height[0]
+        height=width_height[1]
+        cx = coords[0]
+        cy = coords[1]
+        
+        if method == "topleft":
+            cx = cx + width / 2
+            cy = cy + height / 2
+        elif method != "center":
+            print("Error: Method must be specified as either 'topleft' or 'center'.")
+            pass 
+
+        return cx - width / 2 <= posx <= cx + width / 2 and cy - height / 2 <= posy <= cy + height / 2 
+
+
+    def create_button(self, coords: tuple[float, float], width_height: tuple[float, float], text="", 
+                      btn_color=highlightColor, highlight_color=fontColor, text_color=darkColor, text_highlight=fontColor, 
+                      method="topleft", font_size=32):
+        '''draws button rectangles at specified coordinates'''
+        if method == "topleft":
+            center = (coords[0] + width_height[0] / 2, coords[1] + width_height[1] / 2)
+            inner_rec = pygame.Rect((coords[0] + 10, coords[1] + 10), (width_height[0] - 20, width_height[1] - 20))
+            outer_rec = pygame.Rect(coords, width_height)
+            pygame.draw.rect(self.screen, highlight_color, outer_rec)
+            pygame.draw.rect(self.screen, btn_color, inner_rec)
+            temp_text = self.renderText(text, text_color, font_size, text_highlight, 2)
+            temp_rect = temp_text.get_rect(center=center)
+            self.screen.blit(temp_text, temp_rect)
+        elif method == "center":
+            topleft = (coords[0] - width_height[0] / 2, coords[1] - width_height[1] / 2)
+            inner_rec = pygame.Rect((topleft[0] + 10, topleft[1] + 10), (width_height[0] - 20, width_height[1] - 20))
+            outer_rec = pygame.Rect(topleft, width_height)
+            pygame.draw.rect(self.screen, btn_color, inner_rec)
+            pygame.draw.rect(self.screen, highlight_color, outer_rec)
+            temp_text = self.renderText(text, text_color, font_size, text_highlight, 2)
+            temp_rect = temp_text.get_rect(center=coords)
+            self.screen.blit(temp_text, temp_rect)
+        else:
+            print("Error: Method must be either 'topleft' or 'center'.")
+            return
+        return
 
     def recv_players(self):
         '''get player names from the message queue and add them'''
@@ -106,15 +151,15 @@ class Game:
         while self.running:
             # create background image tiling
             self.fillWindowBg()
-
             self.handle_events()
             
             if self.game_state == 'start-screen':
-                pygame.draw.rect(self.screen, pygame.Color(fontColor), (self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35, 120, 70))
-                pygame.draw.rect(self.screen, pygame.Color(highlightColor), (self.WIDTH / 2 - 50, self.HEIGHT / 2 - 25, 100, 50))
-                start_text = self.renderText("START", darkColor, 32, fontColor, 2)
-                start_rect = start_text.get_rect(center=(self.WIDTH // 2, self.HEIGHT // 2))
-                self.screen.blit(start_text, start_rect)
+                # pygame.draw.rect(self.screen, pygame.Color(fontColor), (self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35, 120, 70))
+                # pygame.draw.rect(self.screen, pygame.Color(highlightColor), (self.WIDTH / 2 - 50, self.HEIGHT / 2 - 25, 100, 50))
+                # start_text = self.renderText("START", darkColor, 32, fontColor, 2)
+                # start_rect = start_text.get_rect(center=(self.WIDTH // 2, self.HEIGHT // 2))
+                # self.screen.blit(start_text, start_rect)
+                self.create_button((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), text="START")
             elif self.game_state == 'code-screen':
                 self.createPanelBg(40, 40, self.WIDTH - 80, self.HEIGHT - 80, 10)
                 self.recv_players()
@@ -128,8 +173,16 @@ class Game:
                     text = self.renderText("You need at least 3 players to start!", fontColor, 28, darkColor, 3)
                     text_rect = text.get_rect(topleft=(120,150))
                     self.screen.blit(text, text_rect)
+                    
+                    self.create_button((800,100),(280,120))
+                    # button_rect_2 = pygame.Rect((790,90), (300, 140))
+                    # pygame.draw.rect(self.screen, pygame.Color(highlightColor), button_rect_2)
+                    # button_rect_1 = pygame.Rect((800,100), (280, 120))
+                    # pygame.draw.rect(self.screen, pygame.Color(fontColor), button_rect_1)
                 else:
-                    #make start button visible
+                    # button_rect_1 = pygame.Rect((800,100), (100, 200))
+                    # pygame.draw.rect(self.screen, pygame.Color(fontColor), button_rect_1)
+                    # pygame.draw.rect(self.screen, pygame.Color(highlightColor), (self.WIDTH / 2 - 50, self.HEIGHT / 2 - 25, 100, 50))
                     pass
                 text = self.renderText("Players:", fontColor, 42, darkColor, 3)
                 text_rect = text.get_rect(topleft=(120, 180))
@@ -137,7 +190,7 @@ class Game:
 
                 HORIZONTAL_SPACING = 100  # Adjust as needed
                 VERTICAL_SPACING = 40  # Adjust as needed
-                TOP_MARGIN = 220  # Starting y position
+                TOP_MARGIN = 230  # Starting y position
                 LEFT_MARGIN = 120  # Starting x position
                 x_pos = LEFT_MARGIN
                 y_pos = TOP_MARGIN
