@@ -93,7 +93,15 @@ body {
     display: flex;
     justify-content: center;
     flex-direction: column;
+    height: fit-content;
+}
+
+.sideBySide {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
     align-items: center;
+    flex-wrap: nowrap;
     height: fit-content;
 }
 
@@ -133,6 +141,8 @@ button {
     font-size: 3vh;
     font-weight: bold;
     text-align: center;
+    display: flex;
+    justify-content: center;
 }
 
 button:hover {
@@ -140,4 +150,36 @@ button:hover {
     border: solid var(--highlight-color) 1vh;
     color: var(--light-color);
     cursor: pointer;
+}
+
+button img {
+    height: 30vh;
+}
+
+#paintArea {
+    background-color: var(--light-color);
+    margin: 1vw;
+    border-radius: 15px;
+    border: solid var(--dark-color) 1vh;
+    flex: 1 0 30vw;
+    aspect-ratio: 5 / 4;
+}
+
+@media screen and (max-width:990px) {
+    .LHpopup {
+        min-width: 80vw;
+        min-height: 80vh;
+    }
+    .RHpopup {
+        min-width: 80vw;
+        min-height: 80vh;
+    }
+    .sideBySide {
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        flex-grow: 1;
+    }
+    #paintArea {
+        margin: 0;
+    }
 }

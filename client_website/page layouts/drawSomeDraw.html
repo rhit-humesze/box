@@ -11,12 +11,20 @@
 
 <body>
     <div id="pageContent">
-        <div class="RHpopup">
-            <div id="headerGroup">
-                <div class="popupSubheader">Draw your idea and click submit before time runs out!</div>
-            </div>
-            <div class="entryGroup">
-                <button id="drawSomeSubmitButton">Submit</button>
+        <div class="LHpopup">
+            <div class="sideBySide">
+                <div class="entryGroup">
+                    <div class="popupHeader">Draw Some!</div>
+                    <div class="popupSubheader">Draw your idea and click submit before time runs out!</div>
+                    <button id="drawSomeSubmitButton">Submit</button>
+                </div>
+                <div id="paintArea">
+                    <!-- <div id="drawing-widget" width="320" height="256"> -->
+                        <!-- Courtesy of https://github.com/jjjreisss/drawing-widget?tab=readme-ov-file -->
+                        <!-- <script src="../public/scripts/drawingWidget.js"></script> -->
+                </div>
+                <script src="../public/scripts/draw.js"></script>
+                <!-- https://dev.to/0shuvo0/lets-create-a-drawing-app-with-js-4ej3 -->
             </div>
         </div>
     </div>

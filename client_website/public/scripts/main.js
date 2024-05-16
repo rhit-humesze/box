@@ -126,6 +126,9 @@ drawSomeDraw = () => {
         `<div id="pageContent">
         </div>`);
     document.querySelector('body').appendChild(setupPage);
+    
+    
+    var imagePNG = document.getElementById('drawing-canvas').getPNG.bind(this.drawingCanvas)();
     unveil.play();
 }
 
