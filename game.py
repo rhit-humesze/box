@@ -96,6 +96,9 @@ class Game:
                         if self.check_within_bounds((600,400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
                             self.game_state = 'draw-some-screen'
+                        if self.check_within_bounds((1000,400),(280,120), mouse_x, mouse_y, "center"):
+                            self.start_ticks = pygame.time.get_ticks()
+                            self.game_state = 'boxphone-play-screen'
                     else:
                         pass
         
@@ -175,10 +178,12 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
+        '''
         for i in range(0, 10):
             self.drawings.update({i:DrawingData('test_img.png', 'test', 'player')})
         print(len(self.drawings))
         self.game_state = 'draw-some-tournament-screen'
+        '''
 
         while self.running:
             # create background image tiling
@@ -231,7 +236,7 @@ class Game:
             elif self.game_state == 'select-screen':
                 self.create_button((200,400),(280,80),text="Placeholder 1", method="center",font_size=32)
                 self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
-                self.create_button((1000,400),(280,80),text="Placeholder 3", method="center",font_size=32)
+                self.create_button((1000,400),(280,80),text="Boxphone", method="center",font_size=32)
             elif self.game_state == 'draw-some-screen':
                 text = self.renderText("Draw some!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
@@ -250,6 +255,10 @@ class Game:
                     self.game_state = "draw-some-tournament-screen"
             elif self.game_state == "draw-some-tournament-screen":
                 self.draw_some_tournament()
+            elif self.game_state == "boxphone-play-screen":
+                print("Play boxphone game")
+            elif self.game_state == "boxphone-results-screen":
+                print("Display boxphone game results")
             else:
                 pass
             pygame.display.flip()
