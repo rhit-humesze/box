@@ -30,6 +30,17 @@ class Game:
         self.code = code
         self.players = {}
         self.drawings = {}
+        self.drawing_votes = {}
+
+        #drawing game bools
+        self.left_occupied = False
+        self.right_occupied = False
+        self.round_over = False
+
+        #drawing game vars
+        self.left_drawing = None
+        self.right_drawing = None
+        self.round_time = 0
 
         self._circle_cache = {}
         self.clock = pygame.time.Clock()
@@ -175,9 +186,9 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
-        for i in range(0, 10):
-            self.drawings.update({i:DrawingData('test_img.png', 'test', 'player')})
-        print(len(self.drawings))
+        for i in range(1, 3):
+            self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test', 'player')})
+        # print(len(self.drawings))
         self.game_state = 'draw-some-tournament-screen'
 
         while self.running:
@@ -270,31 +281,94 @@ class Game:
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect2)
 
         temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
-        temp_rect = temp_text.get_rect(center=(self.WIDTH / 2,700))
+        temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
         self.screen.blit(temp_text, temp_rect)
 
-        left_occupied = False
-        right_occupied = False
-        for idx, (sid, drawing) in enumerate(self.drawings.items()):
-            if not left_occupied:
-                self.render_drawing(drawing.image, left_center, (380, 380))
-                temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
-                temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] - 240))
-                self.screen.blit(temp_text, temp_rect)
-                left_occupied = True
-                #start timer
-                #get votes
-                #if all votes come in or timer ends change bottom text to "WINNER: TITLE"
-                #go to next
-                continue
-            if not right_occupied:
-                temp_text = self.render_drawing(drawing.image, right_center, (380, 380))
-                temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
-                temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
-                self.screen.blit(temp_text, temp_rect)
-                right_occupied = True
-                continue
+        temp_text = self.renderText("VS.", fontColor, 96, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, self.HEIGHT / 2))
+        self.screen.blit(temp_text, temp_rect)
+
+        # self.left_occupied = False
+        # self.right_occupied = False
+        # self.round_over = False
+
+        # self.left_drawing = None
+        # self.right_drawing = None
+        if not (self.left_occupied and self.right_occupied):
+            for idx, (sid, drawing) in enumerate(self.drawings.items()):
+                if not self.left_occupied:
+                    self.left_occupied = True
+                    self.left_drawing = drawing
+                elif not self.right_occupied:
+                    self.right_occupied = True
+                    self.right_drawing = drawing
+                if self.right_occupied and self.left_occupied:
+                    break
         
+        #draw left drawing
+        self.render_drawing(self.left_drawing.image, left_center, (380, 380))
+        temp_text = self.renderText(self.left_drawing.title, fontColor, 64, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] - 240))
+        self.screen.blit(temp_text, temp_rect)
+
+        #draw right drawing
+        temp_text = self.render_drawing(self.right_drawing.image, right_center, (380, 380))
+        temp_text = self.renderText(self.right_drawing.title, fontColor, 64, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
+        self.screen.blit(temp_text, temp_rect)
+
+        if not self.round_over:
+            self.round_time = self.timer(10, (self.WIDTH / 2, 100), 64)
+
+        percent_left, percent_right = self.get_vote_percents()
+        # draw percentage text
+        temp_text = self.renderText(str(percent_left) + '%', fontColor, 48, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] + 250))
+        self.screen.blit(temp_text, temp_rect)
+
+        temp_text = self.renderText(str(percent_right) + '%', fontColor, 48, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] + 250))
+        self.screen.blit(temp_text, temp_rect)
+
+        # (len(self.drawing_votes) == len(self.players))
+        if (self.round_time < 0):
+            self.round_over = True
+
+        
+
+    # def recv_votes(self):
+    #     self.drawing_votes.update({1:1})
+    #     self.drawing_votes.update({2:0})
+    #     print(idx)
+    #     # or (len(self.drawing_votes) == len(self.players))
+    #     if (time == 0):
+    #         #calculate winner
+    #         percent_left, percent_right = self.get_vote_percents()
+    #         print(percent_left, percent_right)
+    #         #draw percentage text
+    #         # temp_text = self.renderText(str(percent_left) + , fontColor, 64, darkColor, 2)
+    #         # temp_rect = temp_text.get_rect(center=left_center)
+    #         # self.screen.blit(temp_text, temp_rect)
+
+    #         # temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
+    #         # temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
+    #         # self.screen.blit(temp_text, temp_rect)
+    #         #next round
+
+    def get_vote_percents(self):
+        votes_left = 0
+        votes_right = 0
+        for idx, (sid, vote) in enumerate(self.drawing_votes.items()):
+            if vote:
+                votes_left += 1
+            else:
+                votes_right += 1
+        total = votes_left + votes_right
+        if total == 0:
+            return 0, 0
+        else:
+            return round(votes_left / total, 3) * 100, round(votes_right / total, 3) * 100
+
 
     def render_drawing(self, image_path, coords, dimensions):
         image = pygame.image.load(image_path)
