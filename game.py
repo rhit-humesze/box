@@ -257,6 +257,7 @@ class Game:
 
         self.stop()
 
+
     def draw_some_tournament(self):
         img_rect1 = pygame.Rect(0, 0, 400, 400)
         left_center = (300, 400)
@@ -268,6 +269,10 @@ class Game:
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect1)
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect2)
 
+        temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(self.WIDTH / 2,700))
+        self.screen.blit(temp_text, temp_rect)
+
         left_occupied = False
         right_occupied = False
         for idx, (sid, drawing) in enumerate(self.drawings.items()):
@@ -277,6 +282,10 @@ class Game:
                 temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] - 240))
                 self.screen.blit(temp_text, temp_rect)
                 left_occupied = True
+                #start timer
+                #get votes
+                #if all votes come in or timer ends change bottom text to "WINNER: TITLE"
+                #go to next
                 continue
             if not right_occupied:
                 temp_text = self.render_drawing(drawing.image, right_center, (380, 380))
@@ -286,6 +295,7 @@ class Game:
                 right_occupied = True
                 continue
         
+
     def render_drawing(self, image_path, coords, dimensions):
         image = pygame.image.load(image_path)
         image = pygame.transform.scale(image, dimensions)
