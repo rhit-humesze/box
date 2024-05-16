@@ -1,15 +1,18 @@
 class DrawingData:
     '''data class for drawing data'''
     def __init__(self, img, title, player_name):
-        self.image = img
-        self.title = title
-        self.player_name = player_name
+        self._image = img
+        self._title = title
+        self._player_name = player_name
 
-    def get_image(self):
-        return self.image
+    @property
+    def image(self):
+        return self._image
     
-    def get_title(self):
-        return self.title
+    @property
+    def title(self):
+        return self._title
     
-    def get_player_name(self):
-        return self.player_name
+    @property
+    def player_name(self):
+        return self._player_name
