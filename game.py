@@ -175,7 +175,10 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
-        # self.game_state = 'draw-some-screen'
+        for i in range(0, 10):
+            self.drawings.update({i:DrawingData('test_img.py', 'test', 'player')})
+        print(len(self.drawings))
+        self.game_state = 'draw-some-tournament-screen'
 
         while self.running:
             # create background image tiling
@@ -246,10 +249,7 @@ class Game:
                 if time_left == 0:
                     self.game_state = "draw-some-tournament-screen"
             elif self.game_state == "draw-some-tournament-screen":
-                #start bracket
                 self.draw_some_tournament()
-                #vote on bracket
-                #next bracket
             else:
                 pass
             pygame.display.flip()
@@ -258,6 +258,33 @@ class Game:
         self.stop()
 
     def draw_some_tournament(self):
+        #subset drawings into brackets
+        round = self.create_brackets()
+        bracket_index = 0
+        if bracket_index < len(round):
+            self.draw_bracket(round[bracket_index])
+        #send vote options to host
+        #recv votes
+
+        #next bracket
+
+    def create_brackets(self):
+        '''subsets the '''
+        temp_dict = {}
+        sub_dicts = []
+        for idx, (sid, drawing) in enumerate(self.drawings.items()):
+            temp_dict[sid] = drawing
+            #create brackets of size 3
+            if (idx + 1) % 3 == 0:
+                sub_dicts.append(temp_dict)
+                temp_dict = {}
+        if temp_dict:
+            sub_dicts.append(temp_dict)
+
+        return sub_dicts
+
+    def draw_bracket(self, bracket):
+        # print(len(bracket))
         return
 
     def stop(self):
