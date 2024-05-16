@@ -176,7 +176,7 @@ class Game:
         self.running = True
         ### DEBUGGING PURPOSES ###
         for i in range(0, 10):
-            self.drawings.update({i:DrawingData('test_img.py', 'test', 'player')})
+            self.drawings.update({i:DrawingData('test_img.png', 'test', 'player')})
         print(len(self.drawings))
         self.game_state = 'draw-some-tournament-screen'
 
@@ -258,38 +258,45 @@ class Game:
         self.stop()
 
     def draw_some_tournament(self):
-        #subset drawings into brackets
-        round = self.create_brackets()
-        bracket_index = 0
-        if bracket_index < len(round):
-            self.draw_bracket(round[bracket_index])
-        #send vote options to host
-        #recv votes
+        img_rect1 = pygame.Rect(0, 0, 400, 400)
+        left_center = (300, 400)
+        img_rect1.center = left_center
+        img_rect2 = pygame.Rect(0, 0, 400, 400)
+        right_center = (900, 400)
+        img_rect2.center = right_center
 
-        #next bracket
+        pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect1)
+        pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect2)
 
-    def create_brackets(self):
-        '''subsets the '''
-        temp_dict = {}
-        sub_dicts = []
+        left_occupied = False
+        right_occupied = False
         for idx, (sid, drawing) in enumerate(self.drawings.items()):
-            temp_dict[sid] = drawing
-            #create brackets of size 3
-            if (idx + 1) % 3 == 0:
-                sub_dicts.append(temp_dict)
-                temp_dict = {}
-        if temp_dict:
-            sub_dicts.append(temp_dict)
+            if not left_occupied:
+                self.render_drawing(drawing.image, left_center, (380, 380))
+                temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
+                temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] - 240))
+                self.screen.blit(temp_text, temp_rect)
+                left_occupied = True
+                continue
+            if not right_occupied:
+                temp_text = self.render_drawing(drawing.image, right_center, (380, 380))
+                temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
+                temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
+                self.screen.blit(temp_text, temp_rect)
+                right_occupied = True
+                continue
+        
+    def render_drawing(self, image_path, coords, dimensions):
+        image = pygame.image.load(image_path)
+        image = pygame.transform.scale(image, dimensions)
+        image_rect = image.get_rect(center=coords)
+        self.screen.blit(image, image_rect)
 
-        return sub_dicts
-
-    def draw_bracket(self, bracket):
-        # print(len(bracket))
-        return
 
     def stop(self):
         pygame.quit()
         sys.exit()
+
 
     def fillWindowBg(self):
         self.screen.fill(pygame.Color(medColor))
@@ -298,6 +305,7 @@ class Game:
         for x in range(0, self.WIDTH, bgTile_w):
             for y in range(0, self.HEIGHT, bgTile_h):
                 self.screen.blit(bgTile, (x, y))
+
 
     def createPanelBg(self, xpos, ypos, width, height, outlinewidth):
         pygame.draw.rect(self.screen, pygame.Color(darkColor), (xpos, ypos, width, height))
