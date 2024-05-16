@@ -187,7 +187,7 @@ class Game:
         self.running = True
         ### DEBUGGING PURPOSES ###
         for i in range(1, 3):
-            self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test', 'player')})
+            self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
         self.game_state = 'draw-some-tournament-screen'
 
@@ -270,6 +270,9 @@ class Game:
 
 
     def draw_some_tournament(self):
+        ### DEBUG ###
+        self.drawing_votes.update({1:1})
+
         img_rect1 = pygame.Rect(0, 0, 400, 400)
         left_center = (300, 400)
         img_rect1.center = left_center
@@ -280,20 +283,10 @@ class Game:
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect1)
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect2)
 
-        temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
-        temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
-        self.screen.blit(temp_text, temp_rect)
-
         temp_text = self.renderText("VS.", fontColor, 96, darkColor, 2)
         temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, self.HEIGHT / 2))
         self.screen.blit(temp_text, temp_rect)
 
-        # self.left_occupied = False
-        # self.right_occupied = False
-        # self.round_over = False
-
-        # self.left_drawing = None
-        # self.right_drawing = None
         if not (self.left_occupied and self.right_occupied):
             for idx, (sid, drawing) in enumerate(self.drawings.items()):
                 if not self.left_occupied:
@@ -317,9 +310,6 @@ class Game:
         temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
         self.screen.blit(temp_text, temp_rect)
 
-        if not self.round_over:
-            self.round_time = self.timer(10, (self.WIDTH / 2, 100), 64)
-
         percent_left, percent_right = self.get_vote_percents()
         # draw percentage text
         temp_text = self.renderText(str(percent_left) + '%', fontColor, 48, darkColor, 2)
@@ -329,6 +319,23 @@ class Game:
         temp_text = self.renderText(str(percent_right) + '%', fontColor, 48, darkColor, 2)
         temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] + 250))
         self.screen.blit(temp_text, temp_rect)
+
+        if not self.round_over:
+            self.round_time = self.timer(10, (self.WIDTH / 2, 100), 64)
+            temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
+            temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
+            self.screen.blit(temp_text, temp_rect)
+        else:
+            #declare winner
+            if percent_left < percent_right:
+                winner = self.right_drawing
+            elif percent_left > percent_right:
+                winner = self.left_drawing
+            else:
+                pass
+            temp_text = self.renderText("Round winner: " + winner.title + "!", fontColor, 48, darkColor, 2)
+            temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
+            self.screen.blit(temp_text, temp_rect)
 
         # (len(self.drawing_votes) == len(self.players))
         if (self.round_time < 0):
