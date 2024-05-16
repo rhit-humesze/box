@@ -4,7 +4,9 @@ import sys
 import string
 from queue import Queue
 from typing import Tuple
+
 from host import Host
+from models import DrawingData
 
 highlightColor = "#88BABA"
 fontColor = "#3F88C8"
@@ -15,7 +17,8 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, width=1200, height=800):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, 
+                 width=1200, height=800):
         '''initialize Game'''
         pygame.init()
         self.WIDTH:  int = width
@@ -26,7 +29,11 @@ class Game:
         self.running = False
         self.code = code
         self.players = {}
+        self.drawings = {}
+
         self._circle_cache = {}
+        self.clock = pygame.time.Clock()
+        self.start_ticks = 0
 
         self.join_q = join_q
         self.disc_q = disc_q
@@ -79,15 +86,19 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     if self.game_state == 'start-screen':
-                        #start page button bounds check
                         if self.check_within_bounds((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'code-screen'
                     elif self.game_state == 'code-screen':
                         if len(self.players) >= 3 and self.check_within_bounds((800,100),(280,120), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'select-screen'
+                    elif self.game_state == 'select-screen':
+                        # self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
+                        if self.check_within_bounds((600,400),(280,120), mouse_x, mouse_y, "center"):
+                            self.start_ticks = pygame.time.get_ticks()
+                            self.game_state = 'draw-some-screen'
                     else:
-                        #for future
                         pass
+        
 
     def check_within_bounds(self, coords: Tuple[float, float], width_height: Tuple[float, float], posx, posy, method: str) -> bool:
         '''checks whether floats x and y are within given bounds. 'method' specifies if the provided coords are the center of the bounding box or the top left.'''
@@ -132,12 +143,27 @@ class Game:
             print("Error: Method must be either 'topleft' or 'center'.")
             return
         return
+    
+    def timer(self, start_time, coords, font_size) -> int:
+        '''creates and runs a timer object. returns the time remaining.'''
+        elapsed_ticks = pygame.time.get_ticks() - self.start_ticks
+        elapsed_seconds = elapsed_ticks // 1000
+        time_left = start_time - elapsed_seconds
+        timer_text = self.renderText(f"{time_left}", fontColor, font_size, darkColor, 3)
+        text_rect = timer_text.get_rect(center=coords)
+        self.screen.blit(timer_text, text_rect)
+        return time_left
 
     def recv_players(self):
         '''get player names from the message queue and add them'''
         while not self.join_q.empty():
             player_dict_entry = self.join_q.get()
             self.players.update(player_dict_entry)
+
+    def recv_drawings(self):
+        while not self.draw_q.empty():
+            img_dict_entry = self.draw_q.get()
+            self.drawings.update(img_dict_entry)
 
     def check_disc_players(self):
         '''checks if a player has disconnected and removes them'''
@@ -148,13 +174,14 @@ class Game:
     def game_loop(self):
         '''main loop for the game screen'''
         self.running = True
+        ### DEBUGGING PURPOSES ###
+        self.game_state = 'draw-some-screen'
 
         while self.running:
             # create background image tiling
             self.fillWindowBg()
             self.handle_events()
-            ### DEBUGGING PURPOSES ###
-            # self.game_state = 'select-screen'
+            
 
             if self.game_state == 'start-screen':
                 self.create_button((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), text="START")
@@ -202,9 +229,36 @@ class Game:
                 self.create_button((200,400),(280,80),text="Placeholder 1", method="center",font_size=32)
                 self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
                 self.create_button((1000,400),(280,80),text="Placeholder 3", method="center",font_size=32)
+            elif self.game_state == 'draw-some-screen':
+                text = self.renderText("Draw some!", fontColor, 128, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
+                time_left = self.timer(45, (600,500), 400)
+                if time_left == 0:
+                    self.game_state = "draw-some-name-screen"
+            elif self.game_state == "draw-some-name-screen":
+                text = self.renderText("Name your masterpiece!", fontColor, 128, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
+                time_left = self.timer(15, (600,500), 400)
+                self.recv_drawings()
+                #if timer ends or all players have submitted
+                if time_left == 0:
+                    self.game_state = "draw-some-tournament-screen"
+            elif self.game_state == "draw-some-tournament-screen":
+                #start bracket
+                self.draw_some_tournament()
+                #vote on bracket
+                #next bracket
+            else:
+                pass
             pygame.display.flip()
+            self.clock.tick(60)
 
         self.stop()
+
+    def draw_some_tournament(self):
+        return
 
     def stop(self):
         pygame.quit()

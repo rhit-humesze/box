@@ -98,9 +98,6 @@ playerSetup = () => {
 // page for playing games within box lobby
 boxLobby = () => {
     document.querySelector('#pageContent').remove();
-    // var setupPage = htmlToElement(
-    //     `<div id="pageContent">
-    //     </div>`);
     var setupPage = htmlToElement(
         `<div id="pageContent">
             <div class="RHpopup">
