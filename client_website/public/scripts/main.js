@@ -24,8 +24,8 @@ window.onload = () => {
         clickable = false;
         console.log(boxCode)
         click.play();
-        var serverLobby = "http://127.0.0.1:5100/"
-        socket = io.connect(`${serverLobby}`);
+        var serverLobby = "https://" + "137.112.224.241" + ":5100/"
+        socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
         socket.on("connect_error", () => {
             socket.close()
             clickable = true;
@@ -66,6 +66,16 @@ playerSetup = () => {
         }
     });
     socket.on("connect", () => {});
+    socket.on("drawSomeDraw", () => {
+        drawSomeDraw();
+    });
+    socket.on("drawSomeVote", (option1, option2) => {
+        drawSomeVote(option1, option2);
+    });
+    socket.on("timesUp", () => {
+        timesUp.play();
+        clearPage();
+    });
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
@@ -89,13 +99,12 @@ playerSetup = () => {
         }
         console.log(userName)
         click.play();
-        // TODO: send username to box lobby server
         socket.emit("userName", userName);
         boxLobby();
     }
 }
 
-// page for playing games within box lobby
+// page for awaiting game start within box lobby
 boxLobby = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
@@ -109,4 +118,20 @@ boxLobby = () => {
         </div>`);
     document.querySelector('body').appendChild(setupPage);
     unveil.play();
+}
+
+drawSomeDraw = () => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
+    unveil.play();
+}
+
+clearPage = () => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent"></div>`);
+    document.querySelector('body').appendChild(setupPage);
 }

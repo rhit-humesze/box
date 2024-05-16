@@ -22,14 +22,17 @@ class Host:
         
     def run(self):
         '''start the server'''
-        self.server = eventlet.listen(('0.0.0.0', 5100))
+        self.server = eventlet.wrap_ssl(eventlet.listen(('0.0.0.0', 5100)), 
+                                        certfile='./host.cert', 
+                                        keyfile='./host.key', 
+                                        server_side=True)
         eventlet.wsgi.server(self.server, self.app, log_output=False)
 
     def printServerInfo(self):
         print(f"\nBox code: {self.gameCode}\n")
         print(f"Players: {list(self.players.values())}")
 
-    def connect(self, sid, environ):
+    def connect(self, sid, env):
         print(f"New client {sid} connected.")
         self.players[sid] = f"Player {len(self.players) + 1}"
         self.printServerInfo()
