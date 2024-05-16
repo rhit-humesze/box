@@ -175,7 +175,7 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
-        self.game_state = 'draw-some-screen'
+        # self.game_state = 'draw-some-screen'
 
         while self.running:
             # create background image tiling

@@ -8,12 +8,12 @@ from host import Host
 from game import Game
 from models import DrawingData
 
-def start_server(code: str, join_q: Queue, disc_q: Queue):
-    host = Host(code, join_q, disc_q)
+def start_server(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue):
+    host = Host(code, join_q, disc_q, draw_q)
     host.run()
 
-def start_game(code: str, join_q: Queue, disc_q: Queue):
-    game = Game(code, join_q, disc_q)
+def start_game(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue):
+    game = Game(code, join_q, disc_q, draw_q)
     game.game_loop()
 
 if __name__ == "__main__":
