@@ -32,7 +32,7 @@ class Host:
         self.sio.on("userName", self.newUser)
         self.sio.on("drawingSubmission", self.drawingSubmission)
         self.sio.on("drawingVote", self.drawingVote)
-        self.sio.on("boxphoneImageSubmission", self.boxphoneimageSubmission)
+        self.sio.on("boxphoneImageSubmission", self.boxphoneImageSubmission)
         self.sio.on("boxphoneTextSubmission", self.boxphoneTextSubmission)
         
     def run(self):
@@ -88,23 +88,41 @@ class Host:
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
 
-    def boxphonedrawingSubmission(self, sid, imageData, name):
+
+    def boxphoneImageSubmission(self, sid, imageData):
+        # tell current player to wait and next player to start writing
+        self.sio.emit("boxphoneWait", room=sid)
+        next_sid = self.getNextSid(sid)
+        self.sio.emit("boxphoneWrite", imageData, room=next_sid)
+
+        # store image
         imageData = imageData.replace('data:image/png;base64,', '')
         img_data = str.encode(imageData)
-        path = os.path.join(os.curdir, f"images/{sid}_{name}.png")
-        # TODO need to add image/name to game and associate with sid
+        path = os.path.join(os.curdir, f"images/boxphone_{sid}.png")
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
         self.image_prompts_q.put({sid:path})
-        print(f"Player {name} submitted an image response")
+        print(f"Player {sid} submitted an image response")
 
-    def boxphonetextSubmission(self, sid, text, name):
+
+    def boxphoneTextSubmission(self, sid, text):
+        # tell current player to wait and next player to start drawing
+        self.sio.emit("boxphoneWait", room=sid)
+        next_sid = self.getNextSid(sid)
+        self.sio.emit("boxphoneDraw", text, room=next_sid)
+
+        # store text
         self.text_prompts_q.put({sid:text})
-        print(f"Player {name} submitted a text response")
+        print(f"Player {sid} submitted a text response")
+
+
+    def getNextSid(self, sid):
+        #TODO: return next player sid instead of passed in sid
+        return sid
 
     def drawingVote(self, sid, side):
         # TODO need to send 0 or 1 to game function
-        if(side == "left"):
+        if side == "left":
             return 0
         else:
             return 1
@@ -113,3 +131,4 @@ class Host:
         '''safely stop the server'''
         if self.server:
             self.server.close()
+

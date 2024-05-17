@@ -219,7 +219,7 @@ class Game:
         for i in range(1, 4):
             self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        self.game_state = 'select-screen'
+        #self.game_state = 'select-screen'
 
         while self.running:
             # create background image tiling
@@ -489,6 +489,7 @@ class Game:
             return round(votes_left / total, 3) * 100, round(votes_right / total, 3) * 100
 
     def boxphone_results(self):
+        print("Show boxphone results")
         #TODO: display results, alternating between text, image, text, image, etc
 
 
