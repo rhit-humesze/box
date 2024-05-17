@@ -263,7 +263,7 @@ class Game:
                 text = self.renderText("Draw some!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
-                time_left = self.timer(60, (600,500), 400)
+                time_left = self.timer(120, (600,500), 400)
                 self.recv_drawings()
                 if time_left == 0:
                     self.msg_q.put(1)
@@ -283,13 +283,12 @@ class Game:
                 pass
             pygame.display.flip()
             self.clock.tick(60)
-
         self.stop()
 
 
     def draw_some_tournament(self):
         if(len(self.drawings) == 1):
-            self.msg_q.put(3)
+            self.msg_q.put(self.draw_some_winner.image)
             self.game_state = "draw-some-won-screen"
             return
 
