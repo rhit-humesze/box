@@ -380,6 +380,7 @@ class Game:
             
             #end intermission
             if (self.intermission_time < 0):
+                self.drawing_votes.clear()
                 self.broadcast_vote = False
                 #send msg that intermission is over
                 #allow timer to be set
@@ -396,11 +397,10 @@ class Game:
                     self.drawings.pop(self.right_sid)
                     self.right_occupied = False
                 elif winner_side == 1:
-                    # self.drawings.pop(self.left_sid)
+                    self.drawings.pop(self.left_sid)
                     self.left_occupied = False
 
-        # (len(self.drawing_votes) == len(self.players))
-        if (self.round_time < 0):
+        if (self.round_time < 0) or (len(self.drawing_votes) == len(self.players)):
             if not self.start_ticks_lock:
                 #send msg that round is over
                 self.msg_q.put(1)
@@ -419,7 +419,7 @@ class Game:
         votes_left = 0
         votes_right = 0
         for idx, (sid, vote) in enumerate(self.drawing_votes.items()):
-            if vote:
+            if not vote:
                 votes_left += 1
             else:
                 votes_right += 1
