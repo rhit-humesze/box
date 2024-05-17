@@ -1,6 +1,8 @@
 import eventlet
 import socketio
 import threading
+import base64
+import os
 
 from queue import Queue
 
@@ -26,6 +28,8 @@ class Host:
         self.sio.event(self.disconnect)
         self.sio.on("gameCode", self.checkCode)
         self.sio.on("userName", self.newUser)
+        self.sio.on("drawingSubmission", self.drawingSubmission)
+        self.sio.on("drawingVote", self.drawingVote)
         
     def run(self):
         '''start the server'''
@@ -80,6 +84,21 @@ class Host:
         self.players[sid] = data
         self.join_q.put({sid:data})
         self.printServerInfo()
+        
+    def drawingSubmission(self, sid, imageData, name):
+        imageData = imageData.replace('data:image/png;base64,', '')
+        img_data = str.encode(imageData)
+        path = os.path.join(os.curdir, f"images/{sid}_{name}.png")
+        # TODO need to add image/name to game and associate with sid
+        with open(path, "wb") as fh:
+            fh.write(base64.decodebytes(img_data))
+    
+    def drawingVote(self, sid, side):
+        # TODO need to send 0 or 1 to game function
+        if(side == "left"):
+            return 0
+        else:
+            return 1
     
     def stop(self):
         '''safely stop the server'''
