@@ -45,7 +45,7 @@ codeEntry = () => {
         clickable = false;
         console.log(boxCode);
         click.play();
-        var serverLobby = "https://" + "137.112.226.137" + ":5100/"
+        var serverLobby = "https://" + "137.112.226.133" + ":5100/"
         socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
         socket.on("connect_error", (error) => {
             socket.close()
@@ -127,8 +127,9 @@ playerSetup = () => {
         </div>`);
     document.querySelector('body').appendChild(setupPage);
     document.getElementById("addPlayer").onclick = (event) => {
+        let regex = /^[a-zA-Z0-9 ]+$/;
         var userName = document.getElementById("userName").value;
-        if(userName == "") {
+        if(userName == "" || !regex.test(userName)) {
             return;
         }
         playerusername = userName
@@ -202,8 +203,9 @@ drawSomeDraw = () => {
     let saveBtn = document.getElementById("drawSomeSubmitButton");
     saveBtn.addEventListener("click", () => {
         let data = canvas.resizeAndExport(256, 256);
+        let regex = /^[a-zA-Z0-9 ]+$/;
         let name = document.getElementById("nameEntry").value;
-        if(name == "") {
+        if(name == "" || !regex.test(name)) {
             return;
         }
         console.log(data);
