@@ -206,7 +206,7 @@ class Game:
         # for i in range(1, 4):
         #     self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        # self.game_state = 'draw-some-won-screen'
+        self.game_state = 'draw-some-won-screen'
 
         while self.running:
             # create background image tiling
@@ -279,6 +279,9 @@ class Game:
                 border_rect.center = (self.WIDTH / 2, self.HEIGHT / 2 + 50)
                 pygame.draw.rect(self.screen, pygame.Color(darkColor), border_rect)
                 self.render_drawing(self.draw_some_winner.image, (self.WIDTH / 2, self.HEIGHT / 2 + 50), (500,500))
+                text = self.renderText(self.draw_some_winner.title, fontColor, 60, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2, 750))
+                self.screen.blit(text, text_rect)
             else:
                 pass
             pygame.display.flip()
