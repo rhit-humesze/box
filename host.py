@@ -46,7 +46,15 @@ class Host:
         while True:
             if not self.msg_q.empty():
                 msg = self.msg_q.get()
-                print(msg)
+                if(msg == 0):
+                    self.sio.emit("drawSomeDraw")
+                    print("\nstarting drawing round\n")
+                if(msg == 1):
+                    self.sio.emit("timesUp")
+                    print("\nTIMES UP!!!\n")
+                if(msg == 2):
+                    self.sio.emit("drawSomeVote")
+                    print("\nstarting voting round\n")
 
     def start_server(self):
         self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 

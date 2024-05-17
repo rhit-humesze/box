@@ -39,6 +39,7 @@ class Game:
         self.right_occupied = False
         self.round_over = False
         self.intermission_over = True
+        self.broadcast_vote = False
 
         #drawing game vars
         self.left_drawing = None
@@ -203,7 +204,7 @@ class Game:
         for i in range(1, 4):
             self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        self.game_state = 'select-screen'
+        # self.game_state = 'select-screen'
 
         while self.running:
             # create background image tiling
@@ -262,6 +263,7 @@ class Game:
                 self.screen.blit(text, text_rect)
                 time_left = self.timer(60, (600,500), 400)
                 if time_left == 0:
+                    self.msg_q.put(1)
                     self.game_state = "draw-some-tournament-screen"
                     self.start_ticks = pygame.time.get_ticks()
             elif self.game_state == "draw-some-tournament-screen":
@@ -283,7 +285,7 @@ class Game:
             self.game_state = "draw-some-won-screen"
 
         ### DEBUG ###
-        self.drawing_votes.update({1:1})
+        # self.drawing_votes.update({1:1})
 
         img_rect1 = pygame.Rect(0, 0, 400, 400)
         left_center = (300, 400)
@@ -300,7 +302,7 @@ class Game:
         self.screen.blit(temp_text, temp_rect)
 
         if not (self.left_occupied and self.right_occupied):   
-            print(self.round_time) 
+            # print(self.round_time) 
             for idx, (sid, drawing) in enumerate(self.drawings.items()):
                 # print(len(self.drawings))
                 if (drawing == self.left_drawing) or drawing == (self.right_drawing):
@@ -341,11 +343,16 @@ class Game:
         temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] + 250))
         self.screen.blit(temp_text, temp_rect)
 
+        #logic that happens while round is not done yet
         if not self.round_over:
             self.round_time = self.timer(10, (self.WIDTH / 2, 100), 64)
             temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
             temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
             self.screen.blit(temp_text, temp_rect)
+            #add a bool field and require it to be true for this to happen 
+            if not self.broadcast_vote:
+                self.msg_q.put(2)
+                self.broadcast_vote = True
         else:
             #declare winner
             #0 for left 1 for right
@@ -357,8 +364,8 @@ class Game:
                 winner = self.left_drawing
                 winner_side = 0
             else:
-                #TODO: track previous winner to break tie
-                pass
+                winner = self.left_drawing
+                winner_side = 0
 
             #wait a bit
             if not self.intermission_over:
@@ -372,6 +379,8 @@ class Game:
             
             #end intermission
             if (self.intermission_time < 0):
+                self.broadcast_vote = False
+                #send msg that intermission is over
                 #allow timer to be set
                 self.start_ticks_lock = False
                 self.start_ticks = pygame.time.get_ticks()
@@ -390,8 +399,10 @@ class Game:
                     self.left_occupied = False
 
         # (len(self.drawing_votes) == len(self.players))
-        if (self.round_time < 0):
+        if (self.round_time <= 0):
             if not self.start_ticks_lock:
+                #send msg that round is over
+                self.msg_q.put(1)
                 self.start_ticks = pygame.time.get_ticks()
             self.round_over = True
             self.intermission_over = False

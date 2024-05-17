@@ -5,6 +5,8 @@ var click = new Audio('./assets/click.mp3');
 var unveil = new Audio('./assets/unveil.mp3');
 var timesUp = new Audio('./assets/times_up.mp3');
 
+var playerusername = "Player";
+
 // helper function to convert text to html elements
 htmlToElement = (html) => {
 	var template = document.createElement("template");
@@ -15,6 +17,25 @@ htmlToElement = (html) => {
 
 // page for joining box lobby from code
 window.onload = () => {
+    codeEntry()
+}
+
+codeEntry = () => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+            <div class="RHpopup">
+                <div id="headerGroup">
+                    <div class="popupHeader">Welcome to Box.</div>
+                    <div class="popupSubheader">Please enter your Box #:</div>
+                </div>
+                <div class="entryGroup">
+                    <input id="boxCode" class="textInput" maxlength="4" spellcheck="false" placeholder="(ex: ABCD)">
+                    <button id="joinSession">Find Box</button>
+                </div>
+            </div>
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
     var clickable = true
     document.getElementById("joinSession").onclick = () => {
         var boxCode = document.getElementById("boxCode").value;
@@ -26,7 +47,7 @@ window.onload = () => {
         click.play();
         var serverLobby = "https://" + "137.112.226.137" + ":5100/"
         socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
-        socket.on("connect_error", () => {
+        socket.on("connect_error", (error) => {
             socket.close()
             clickable = true;
             timesUp.play();
@@ -57,22 +78,27 @@ window.onload = () => {
 
 // page for player setup on connected box lobby
 playerSetup = () => {
+    socket.removeListener('connect_error');
+    socket.removeListener('connect');
     socket.on("connect_error", (error) => {
-        if (socket.active) {
-            // temporary failure, the socket will automatically try to reconnect
-        } else {
-            clearPage()
-            console.log(error.message);
-        }
+        codeEntry()
+        socket.close()
+        console.log(error.message);
+        timesUp.play()
     });
-    socket.on("connect", () => {});
+    socket.on("connect", () => {
+        socket.emit("userName", playerusername);
+    });
     socket.on("drawSomeDraw", () => {
+        print("drawSomeDraw")
         drawSomeDraw();
     });
     socket.on("drawSomeVote", () => {
+        print("drawSomeVote")
         drawSomeVote();
     });
     socket.on("timesUp", () => {
+        print("timesUp")
         timesUp.play();
         clearPage();
     });
@@ -96,9 +122,10 @@ playerSetup = () => {
         if(userName == "") {
             return;
         }
+        playerusername = userName
         console.log(userName);
         click.play();
-        socket.emit("userName", userName);
+        socket.emit("userName", playerusername);
         boxLobby();
     }
     unveil.play();
