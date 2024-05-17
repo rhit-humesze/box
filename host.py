@@ -3,6 +3,7 @@ import socketio
 import threading
 import base64
 import os
+from models import DrawingData
 
 from queue import Queue
 
@@ -79,17 +80,18 @@ class Host:
     def drawingSubmission(self, sid, imageData, name):
         imageData = imageData.replace('data:image/png;base64,', '')
         img_data = str.encode(imageData)
-        path = os.path.join(os.curdir, f"images/{sid}_{name}.png")
-        # TODO need to add image/name to game and associate with sid
+        filepath = f"images/{sid}_{name}.png"
+        path = os.path.join(os.curdir, filepath)
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
+        drawing = DrawingData(filepath, name, self.players[sid])
+        self.draw_q.put({sid:drawing})
     
     def drawingVote(self, sid, side):
-        # TODO need to send 0 or 1 to game function
         if(side == "left"):
-            return 0
+            self.vote_q.put({sid:int(0)})
         else:
-            return 1
+            self.vote_q.put({sid:int(1)})
     
     def stop(self):
         '''safely stop the server'''
