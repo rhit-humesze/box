@@ -8,12 +8,12 @@ from host import Host
 from game import Game
 from models import DrawingData
 
-def start_server(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue):
-    host = Host(code, join_q, disc_q, draw_q)
+def start_server(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue):
+    host = Host(code, join_q, disc_q, draw_q, vote_q, msg_q)
     host.run()
 
-def start_game(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue):
-    game = Game(code, join_q, disc_q, draw_q)
+def start_game(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue):
+    game = Game(code, join_q, disc_q, draw_q, vote_q, msg_q)
     game.game_loop()
 
 if __name__ == "__main__":
@@ -21,7 +21,9 @@ if __name__ == "__main__":
     join_q = Queue()
     disc_q = Queue()
     draw_q = Queue()
-    shared_args = [code, join_q, disc_q, draw_q]
+    vote_q = Queue()
+    msg_q = Queue()
+    shared_args = [code, join_q, disc_q, draw_q, vote_q, msg_q]
     server_thread = threading.Thread(target=start_server, args=shared_args)
     game_thread = threading.Thread(target=start_game, args=shared_args)
 

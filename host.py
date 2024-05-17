@@ -1,20 +1,27 @@
 import eventlet
 import socketio
+import threading
 import base64
 import os
 
 from queue import Queue
 
 class Host:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue):
         self.sio = socketio.Server(cors_allowed_origins="*")
         self.app = socketio.WSGIApp(self.sio)
         self.players = {}
         self.gameCode = code
         self.server = None
+
+        #outtake queue
         self.join_q = join_q
         self.disc_q = disc_q
         self.draw_q = draw_q
+        self.vote_q = vote_q
+
+        #intake queue
+        self.msg_q = msg_q
         
         # init events
         self.sio.event(self.connect)
@@ -26,6 +33,12 @@ class Host:
         
     def run(self):
         '''start the server'''
+        # serv_thread = threading.Thread(target=self.start_server)
+        # serv_thread.start()
+        # serv_thread.join()
+        self.start_server()
+    
+    def start_server(self):
         self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 
                                         certfile='./host.cert', 
                                         keyfile='./host.key', 
