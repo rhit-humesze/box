@@ -53,12 +53,12 @@ class Host:
                     # print("\nstarting voting round\n")
                 else:
                     self.sio.emit("gameOver")
-                    filepath = f"images"
-                    path = os.path.join(os.curdir, filepath)
-                    for drawing in os.listdir(path):
-                        if(drawing != msg):
-                            drawingPath = os.path.join(filepath, drawing)
-                            os.remove(drawingPath)
+                    # filepath = f"images"
+                    # path = os.path.join(os.curdir, filepath)
+                    # for drawing in os.listdir(path):
+                    #     if(drawing != msg):
+                    #         drawingPath = os.path.join(filepath, drawing)
+                    #         os.remove(drawingPath)
                     # print("\nending game\n")
                     
             eventlet.sleep(0.1)  # Sleep briefly to prevent a tight loop
