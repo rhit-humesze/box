@@ -17,7 +17,7 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue,
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue,
                  width=1200, height=800):
         '''initialize Game'''
         pygame.init()
@@ -52,10 +52,15 @@ class Game:
         self.clock = pygame.time.Clock()
         self.start_ticks = 0
 
+        #intake queues
         self.join_q = join_q
         self.disc_q = disc_q
         self.draw_q = draw_q
         self.vote_q = vote_q
+
+        #msg queue
+        self.msg_q = msg_q
+
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
@@ -111,9 +116,10 @@ class Game:
                         if len(self.players) >= 3 and self.check_within_bounds((800,100),(280,120), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'select-screen'
                     elif self.game_state == 'select-screen':
-                        # self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
-                        if self.check_within_bounds((600,400),(280,120), mouse_x, mouse_y, "center"):
+                        if self.check_within_bounds((300,400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
+                            #send msg to host
+
                             self.game_state = 'draw-some-screen'
                     else:
                         pass
@@ -197,7 +203,7 @@ class Game:
         for i in range(1, 4):
             self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        self.game_state = 'draw-some-tournament-screen'
+        self.game_state = 'select-screen'
 
         while self.running:
             # create background image tiling
@@ -248,27 +254,16 @@ class Game:
                     self.screen.blit(player_text, player_rect)
                     x_pos += player_rect.width + horizontal_spacing
             elif self.game_state == 'select-screen':
-                self.create_button((200,400),(280,80),text="Placeholder 1", method="center",font_size=32)
-                self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
-                self.create_button((1000,400),(280,80),text="Placeholder 3", method="center",font_size=32)
+                self.create_button((300,400),(280,80),text="Draw Some", method="center",font_size=32)
+                self.create_button((900,400),(280,80),text="Box Phone", method="center",font_size=32)
             elif self.game_state == 'draw-some-screen':
                 text = self.renderText("Draw some!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
-                time_left = self.timer(45, (600,500), 400)
-                if time_left == 0:
-                    self.game_state = "draw-some-name-screen"
-                    self.start_ticks = 0
-            elif self.game_state == "draw-some-name-screen":
-                text = self.renderText("Name your masterpiece!", fontColor, 128, darkColor, 3)
-                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
-                self.screen.blit(text, text_rect)
-                time_left = self.timer(15, (600,500), 400)
-                self.recv_drawings()
-                #if timer ends or all players have submitted
+                time_left = self.timer(60, (600,500), 400)
                 if time_left == 0:
                     self.game_state = "draw-some-tournament-screen"
-                    self.start_ticks = 0
+                    self.start_ticks = pygame.time.get_ticks()
             elif self.game_state == "draw-some-tournament-screen":
                 self.draw_some_tournament()
             elif self.game_state == "draw-some-won-screen":
