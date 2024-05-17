@@ -22,7 +22,7 @@ window.onload = () => {
             return;
         }
         clickable = false;
-        console.log(boxCode)
+        console.log(boxCode);
         click.play();
         var serverLobby = "https://" + "137.112.226.137" + ":5100/"
         socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
@@ -40,7 +40,7 @@ window.onload = () => {
             socket.emit("gameCode", boxCode);
         });
         socket.on("codeDenied", () => {
-            socket.close()
+            socket.close();
             clickable = true;
             timesUp.play();
             document.getElementById("boxCode").value = "";
@@ -85,19 +85,19 @@ playerSetup = () => {
                     <div class="popupSubheader">Please enter your name:</div>
                 </div>
                 <div class="entryGroup">
-                    <input id="userName" maxlength="12" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
+                    <input id="userName" class="textInput" maxlength="12" spellcheck="false" placeholder="(ex: Jack)" style='width: clamp(8rem, 50vw, 30rem) !important'>
                     <button id="addPlayer">Join Box</button>
                 </div>
             </div>
         </div>`);
     document.querySelector('body').appendChild(setupPage);
-    unveil.play()
+    unveil.play();
     document.getElementById("addPlayer").onclick = (event) => {
         var userName = document.getElementById("userName").value;
         if(userName == "") {
             return;
         }
-        console.log(userName)
+        console.log(userName);
         click.play();
         socket.emit("userName", userName);
         boxLobby();
@@ -124,11 +124,60 @@ drawSomeDraw = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
+            <div class="LHpopup">
+                <div class="sideBySide">
+                    <div class="entryGroup">
+                        <div class="popupHeader">Draw Some!</div>
+                        <div class="popupSubheader">Draw your idea and click submit before time runs out!</div>
+                        <button id="drawSomeSubmitButton">Submit</button>
+                    </div>
+                    <div class="paintArea">
+                        <canvas id="paintCanvas"></canvas>
+                        <div style="display: flex; flex-direction: row; flex-wrap: nowrap;">
+                            <div class="clr" data-clr="#000000"></div>
+                            <div class="clr" data-clr="#FF0000"></div>
+                            <div class="clr" data-clr="#FF8800"></div>
+                            <div class="clr" data-clr="#FFFF00"></div>
+                            <div class="clr" data-clr="#00FF00"></div>
+                            <div class="clr" data-clr="#0000FF"></div>
+                            <div class="clr" data-clr="#8800FF"></div>
+                            <div class="clr" data-clr="#FFFFFF"></div>
+                            <div class="clr" data-clr="#E6C25D"></div>
+                        </div>
+                        <input id="slider" class="rangeSlider" type="range" min="3" max="7" value="3">
+                    </div>
+                    <script src="scripts/draw.js"></script>
+                    <!-- courtesy of https://dev.to/0shuvo0/lets-create-a-drawing-app-with-js-4ej3 -->
+                </div>
+            </div>
         </div>`);
     document.querySelector('body').appendChild(setupPage);
-    
-    
-    var imagePNG = document.getElementById('drawing-canvas').getPNG.bind(this.drawingCanvas)();
+    var newScript = document.createElement('script');
+    newScript.type = 'text/javascript';
+    newScript.src = 'scripts/draw.js';
+    newScript.id = 'canvasScript';
+    document.getElementsByTagName('head')[0].appendChild(newScript);
+
+    const canvas = document.getElementById("paintCanvas");
+    let saveBtn = document.getElementById("drawSomeSubmitButton");
+    saveBtn.addEventListener("click", () => {
+        let data = canvas.resizeAndExport(256, 256);
+        let a = document.createElement("a");
+        a.href = data;
+        socket.emit("drawingSubmission", );
+        // a.download = "sketch.png";
+        // a.click();
+        click.play();
+        document.getElementById("canvasScript").remove();
+        clearPage();
+    })
+    canvas.resizeAndExport = function(width, height){
+        var c = document.createElement('canvas');
+        c.width = width;
+        c.height = height;
+        c.getContext('2d').drawImage(this, 0, 0, this.width, this.height, 0, 0, width, height);
+        return c.toDataURL();
+    }
     unveil.play();
 }
 
@@ -137,4 +186,5 @@ clearPage = () => {
     var setupPage = htmlToElement(
         `<div id="pageContent"></div>`);
     document.querySelector('body').appendChild(setupPage);
+    unveil.play();
 }

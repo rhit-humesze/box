@@ -18,16 +18,26 @@
                     <div class="popupSubheader">Draw your idea and click submit before time runs out!</div>
                     <button id="drawSomeSubmitButton">Submit</button>
                 </div>
-                <div id="paintArea">
-                    <!-- <div id="drawing-widget" width="320" height="256"> -->
-                        <!-- Courtesy of https://github.com/jjjreisss/drawing-widget?tab=readme-ov-file -->
-                        <!-- <script src="../public/scripts/drawingWidget.js"></script> -->
+                <div class="paintArea">
+                    <canvas id="paintCanvas"></canvas>
+                    <div style="display: flex; flex-direction: row; flex-wrap: nowrap;">
+                        <div class="clr" data-clr="#000000"></div>
+                        <div class="clr" data-clr="#FF0000"></div>
+                        <div class="clr" data-clr="#FF8800"></div>
+                        <div class="clr" data-clr="#FFFF00"></div>
+                        <div class="clr" data-clr="#00FF00"></div>
+                        <div class="clr" data-clr="#0000FF"></div>
+                        <div class="clr" data-clr="#8800FF"></div>
+                        <div class="clr" data-clr="#FFFFFF"></div>
+                        <div class="clr" data-clr="#E6C25D"></div>
+                    </div>
+                    <input id="slider" class="rangeSlider" type="range" min="3" max="7" value="3">
                 </div>
                 <script src="../public/scripts/draw.js"></script>
-                <!-- https://dev.to/0shuvo0/lets-create-a-drawing-app-with-js-4ej3 -->
+                <!-- courtesy of https://dev.to/0shuvo0/lets-create-a-drawing-app-with-js-4ej3 -->
             </div>
         </div>
     </div>
-    <script src="scripts/main.js"></script>
+    <script src="../public/scripts/main.js"></script>
 </body>
 </html>
