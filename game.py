@@ -206,14 +206,13 @@ class Game:
         # for i in range(1, 4):
         #     self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        self.game_state = 'draw-some-won-screen'
+        # self.game_state = 'draw-some-won-screen'
 
         while self.running:
             # create background image tiling
             self.fillWindowBg()
             self.handle_events()
             
-
             if self.game_state == 'start-screen':
                 self.create_button((self.WIDTH / 2 - 60, self.HEIGHT / 2 - 35), (120, 70), text="START")
             elif self.game_state == 'code-screen':
