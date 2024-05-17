@@ -196,7 +196,7 @@ class Game:
         ### DEBUGGING PURPOSES ###
         for i in range(1, 4):
             self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
-        print(len(self.drawings))
+        # print(len(self.drawings))
         self.game_state = 'draw-some-tournament-screen'
 
         while self.running:

@@ -152,10 +152,6 @@ button:hover {
     cursor: pointer;
 }
 
-button img {
-    height: 30vh;
-}
-
 .paintArea {
     background-color: var(--med-color);
     margin: 1vw;
