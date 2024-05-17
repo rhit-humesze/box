@@ -61,7 +61,7 @@ playerSetup = () => {
         if (socket.active) {
             // temporary failure, the socket will automatically try to reconnect
         } else {
-            // the connection was denied by the server
+            clearPage()
             console.log(error.message);
         }
     });
@@ -69,8 +69,8 @@ playerSetup = () => {
     socket.on("drawSomeDraw", () => {
         drawSomeDraw();
     });
-    socket.on("drawSomeVote", (option1, option2) => {
-        drawSomeVote(option1, option2);
+    socket.on("drawSomeVote", () => {
+        drawSomeVote();
     });
     socket.on("timesUp", () => {
         timesUp.play();
@@ -91,7 +91,6 @@ playerSetup = () => {
             </div>
         </div>`);
     document.querySelector('body').appendChild(setupPage);
-    unveil.play();
     document.getElementById("addPlayer").onclick = (event) => {
         var userName = document.getElementById("userName").value;
         if(userName == "") {
@@ -102,6 +101,7 @@ playerSetup = () => {
         socket.emit("userName", userName);
         boxLobby();
     }
+    unveil.play();
 }
 
 // page for awaiting game start within box lobby
@@ -120,6 +120,7 @@ boxLobby = () => {
     unveil.play();
 }
 
+// page for drawing images in draw some game
 drawSomeDraw = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
@@ -129,7 +130,10 @@ drawSomeDraw = () => {
                     <div class="entryGroup">
                         <div class="popupHeader">Draw Some!</div>
                         <div class="popupSubheader">Draw your idea and click submit before time runs out!</div>
-                        <button id="drawSomeSubmitButton">Submit</button>
+                        <div class="sideBySide">
+                            <input id="nameEntry" class="textInput" maxlength="20" spellcheck="false" placeholder="(ex: Super funny drawing)" style="margin-right:1vw; font-size: 3vh;">
+                            <button id="drawSomeSubmitButton">Submit</button>
+                        </div>
                     </div>
                     <div class="paintArea">
                         <canvas id="paintCanvas"></canvas>
@@ -162,14 +166,20 @@ drawSomeDraw = () => {
     let saveBtn = document.getElementById("drawSomeSubmitButton");
     saveBtn.addEventListener("click", () => {
         let data = canvas.resizeAndExport(256, 256);
+        let name = document.getElementById("nameEntry").value;
+        if(name == "") {
+            return;
+        }
+        console.log(data);
+        console.log(name);
         // let a = document.createElement("a");
         // a.href = data;
         // a.download = "sketch.png";
         // a.click();
-        socket.emit("drawingSubmission", data);
+        socket.emit("drawingSubmission", data, name);
         click.play();
         document.getElementById("canvasScript").remove();
-        clearPage();
+        drawSomeName(data);
     })
     canvas.resizeAndExport = function(width, height){
         var c = document.createElement('canvas');
@@ -177,6 +187,35 @@ drawSomeDraw = () => {
         c.height = height;
         c.getContext('2d').drawImage(this, 0, 0, this.width, this.height, 0, 0, width, height);
         return c.toDataURL();
+    }
+    unveil.play();
+}
+
+// page for voting on drawings in draw some game
+drawSomeVote = () => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+            <div class="RHpopup">
+                <div class="entryGroup">
+                    <div class="popupHeader" style="text-align:center;">Vote!</div>
+                    <div class="sideBySide">
+                        <button id="button1">Left!</button>
+                        <button id="button2">Right!</button>
+                    </div>
+                </div>
+            </div>
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
+    document.getElementById("button1").onclick = () => {
+        click.play();
+        socket.emit("drawingVote", "left");
+        clearPage();
+    }
+    document.getElementById("button2").onclick = () => {
+        click.play();
+        socket.emit("drawingVote", "right");
+        clearPage();
     }
     unveil.play();
 }

@@ -15,8 +15,11 @@
             <div class="sideBySide">
                 <div class="entryGroup">
                     <div class="popupHeader">Draw Some!</div>
-                    <div class="popupSubheader">Draw your idea and click submit before time runs out!</div>
-                    <button id="drawSomeSubmitButton">Submit</button>
+                    <div class="popupSubheader">Draw your idea, give it a name, and click submit before time runs out!</div>
+                    <div class="sideBySide">
+                        <input id="nameEntry" class="textInput" maxlength="20" spellcheck="false" placeholder="(ex: Super funny drawing)" style="margin-right:1vw; font-size: 3vh;">
+                        <button id="drawSomeSubmitButton">Submit</button>
+                    </div>
                 </div>
                 <div class="paintArea">
                     <canvas id="paintCanvas"></canvas>
