@@ -22,7 +22,7 @@ class Host:
         
     def run(self):
         '''start the server'''
-        self.server = eventlet.wrap_ssl(eventlet.listen(('137.112.224.241', 5100)), 
+        self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 
                                         certfile='./host.cert', 
                                         keyfile='./host.key', 
                                         server_side=True)

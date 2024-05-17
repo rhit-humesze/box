@@ -179,7 +179,7 @@ drawSomeDraw = () => {
         socket.emit("drawingSubmission", data, name);
         click.play();
         document.getElementById("canvasScript").remove();
-        drawSomeName(data);
+        clearPage()
     })
     canvas.resizeAndExport = function(width, height){
         var c = document.createElement('canvas');
