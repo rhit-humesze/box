@@ -63,13 +63,12 @@ class Host:
 
     def connect(self, sid, env):
         print(f"New client {sid} connected.")
-        self.players[sid] = f"Player {len(self.players) + 1}"
         self.printServerInfo()
 
     def disconnect(self, sid):
         print(f"Client {sid} ({self.players[sid]}) disconnected.")
-        self.players.pop(sid)
-        self.disc_q.put(sid)
+        if(self.players.pop(sid, None) != None):
+            self.disc_q.put(sid)
         self.printServerInfo()
 
     def checkCode(self, sid, data):

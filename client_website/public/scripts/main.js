@@ -80,25 +80,26 @@ codeEntry = () => {
 playerSetup = () => {
     socket.removeListener('connect_error');
     socket.removeListener('connect');
-    socket.on("connect_error", (error) => {
-        codeEntry()
+    socket.on("connect_error", (error) => {});
+    socket.io.on("reconnect_failed", () => {
         socket.close()
         console.log(error.message);
         timesUp.play()
-    });
+        codeEntry()
+      });
     socket.on("connect", () => {
         socket.emit("userName", playerusername);
     });
     socket.on("drawSomeDraw", () => {
-        print("drawSomeDraw")
+        console.log("drawSomeDraw")
         drawSomeDraw();
     });
     socket.on("drawSomeVote", () => {
-        print("drawSomeVote")
+        console.log("drawSomeVote")
         drawSomeVote();
     });
     socket.on("timesUp", () => {
-        print("timesUp")
+        console.log("timesUp")
         timesUp.play();
         clearPage();
     });
