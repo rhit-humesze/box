@@ -276,3 +276,18 @@ clearPage = () => {
     document.querySelector('body').appendChild(setupPage);
     unveil.play();
 }
+
+// teehee
+phoneGame = () => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+            <img src="assets/test_img1.png" style="position:fixed;top:0;left:0;width:100vw;height:100vh;">
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
+    print();
+    while(1){
+        unveil.play();
+        console.log("You mad bro?");
+    }
+}

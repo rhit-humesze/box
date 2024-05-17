@@ -2,6 +2,7 @@ import eventlet
 import socketio
 import base64
 import os
+import shutil
 from models import DrawingData
 from queue import Queue
 
@@ -52,7 +53,7 @@ class Host:
                     self.sio.emit("gameOver")
                     filepath = f"images"
                     path = os.path.join(os.curdir, filepath)
-                    os.rmdir(path)
+                    shutil.rmtree(path)
                     os.mkdir(path)
                     # print("\nending game\n")
             eventlet.sleep(0.1)  # Sleep briefly to prevent a tight loop
