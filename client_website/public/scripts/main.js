@@ -80,25 +80,26 @@ codeEntry = () => {
 playerSetup = () => {
     socket.removeListener('connect_error');
     socket.removeListener('connect');
-    socket.on("connect_error", (error) => {
-        codeEntry()
+    socket.on("connect_error", (error) => {});
+    socket.io.on("reconnect_failed", () => {
         socket.close()
         console.log(error.message);
         timesUp.play()
-    });
+        codeEntry()
+      });
     socket.on("connect", () => {
         socket.emit("userName", playerusername);
     });
     socket.on("drawSomeDraw", () => {
-        print("drawSomeDraw")
+        console.log("drawSomeDraw")
         drawSomeDraw();
     });
     socket.on("drawSomeVote", () => {
-        print("drawSomeVote")
+        console.log("drawSomeVote")
         drawSomeVote();
     });
     socket.on("timesUp", () => {
-        print("timesUp")
+        console.log("timesUp")
         timesUp.play();
         clearPage();
     });
@@ -227,8 +228,8 @@ drawSomeVote = () => {
                 <div class="entryGroup">
                     <div class="popupHeader" style="text-align:center;">Vote!</div>
                     <div class="sideBySide">
-                        <button id="button1">Left!</button>
-                        <button id="button2">Right!</button>
+                        <button id="button1" style="width:256px; height:256px; display:flex; align-items:center; font-size: 5vh;">Left!</button>
+                        <button id="button2" style="width:256px; height:256px; display:flex; align-items:center ;font-size: 5vh;">Right!</button>
                     </div>
                 </div>
             </div>
