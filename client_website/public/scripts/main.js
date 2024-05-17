@@ -162,11 +162,11 @@ drawSomeDraw = () => {
     let saveBtn = document.getElementById("drawSomeSubmitButton");
     saveBtn.addEventListener("click", () => {
         let data = canvas.resizeAndExport(256, 256);
-        let a = document.createElement("a");
-        a.href = data;
-        socket.emit("drawingSubmission", );
+        // let a = document.createElement("a");
+        // a.href = data;
         // a.download = "sketch.png";
         // a.click();
+        socket.emit("drawingSubmission", data);
         click.play();
         document.getElementById("canvasScript").remove();
         clearPage();
