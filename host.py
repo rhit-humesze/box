@@ -48,6 +48,13 @@ class Host:
                 elif msg == 2:
                     self.sio.emit("drawSomeVote")
                     # print("\nstarting voting round\n")
+                elif msg == 3:
+                    self.sio.emit("timesUp")
+                    filepath = f"images"
+                    path = os.path.join(os.curdir, filepath)
+                    os.rmdir(path)
+                    os.mkdir(path)
+                    # print("\nending game\n")
             eventlet.sleep(0.1)  # Sleep briefly to prevent a tight loop
 
     def start_server(self):
