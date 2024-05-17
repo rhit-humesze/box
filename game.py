@@ -124,9 +124,9 @@ class Game:
                             print("should send message here")
                             self.msg_q.put("lalalala")
                             self.game_state = 'draw-some-screen'
-                        if self.check_within_bounds((1000,400),(280,120), mouse_x, mouse_y, "center"):
+                        if self.check_within_bounds((900,400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
-                            self.game_state = 'boxphone-play-screen'
+                            self.game_state = 'boxphone-start-screen'
                     else:
                         pass
         
@@ -282,16 +282,61 @@ class Game:
                     self.start_ticks = pygame.time.get_ticks()
             elif self.game_state == "draw-some-tournament-screen":
                 self.draw_some_tournament()
-            elif self.game_state == "boxphone-play-screen":
-                print("Play boxphone game")
-                text = self.renderText("Submit a text or image prompt!", fontColor, 128, darkColor, 3)
+            elif self.game_state == "boxphone-start-screen":
+                text = self.renderText("Submit an initial text prompt!", fontColor, 64, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
-                time_left = self.timer(45, (600,500), 400)
+                writing_time = 30
+                time_left = self.timer(writing_time, (600,500), 400)
                 if time_left == 0:
-                    self.game_state = "boxphone-results-screen"
+                    ''' make actual if statement
+                    if (playersLeft.isEmpty()):
+                        self.game_state = "boxphone-results-screen"
+                    else:
+                        requestText()
+                        self.game_state = "boxphone-image-screen"
+                        self.start_ticks = pygame.time.get_ticks() # reset timer
+                        '''
+                # send message to request test prompt
+            elif self.game_state == "boxphone-text-screen":
+                text = self.renderText("Next player submit a text response!", fontColor, 64, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
+                writing_time = 30
+                time_left = self.timer(writing_time, (600,500), 400)
+                if time_left == 0:
+                    ''' make actual if statement
+                    if (playersLeft.isEmpty()):
+                        self.game_state = "boxphone-results-screen"
+                    else:
+                        nextplayer = 
+                        request(image, nextplayer)
+                        self.game_state = "boxphone-image-screen"
+                        self.start_ticks = pygame.time.get_ticks() # reset timer
+                        '''
+            elif self.game_state == "boxphone-image-screen":
+                text = self.renderText("Next player submit a drawing response!", fontColor, 64, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
+                drawing_time = 30
+                time_left = self.timer(drawing_time, (600,500), 400)
+                if time_left == 0:
+                    ''' make actual if statement
+                    if (playersLeft.isEmpty()):
+                        self.game_state = "boxphone-results-screen"
+                    else:
+                        nextplayer = 
+                        request(image, nextplayer)
+                        self.game_state = "boxphone-text-screen"
+                        self.start_ticks = pygame.time.get_ticks() # reset timer
+                        '''
+                # send message to request test prompt
             elif self.game_state == "boxphone-results-screen":
-                print("Display boxphone game results")
+                self.boxphone_results()
+                # temp stuff
+                text = self.renderText("Epic!", fontColor, 128, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
             elif self.game_state == "draw-some-won-screen":
                 text = self.renderText("Epic!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
@@ -442,6 +487,9 @@ class Game:
             return 0, 0
         else:
             return round(votes_left / total, 3) * 100, round(votes_right / total, 3) * 100
+
+    def boxphone_results(self):
+        #TODO: display results, alternating between text, image, text, image, etc
 
 
     def render_drawing(self, image_path, coords, dimensions):

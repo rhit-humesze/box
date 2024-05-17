@@ -32,6 +32,8 @@ class Host:
         self.sio.on("userName", self.newUser)
         self.sio.on("drawingSubmission", self.drawingSubmission)
         self.sio.on("drawingVote", self.drawingVote)
+        self.sio.on("boxphoneImageSubmission", self.boxphoneimageSubmission)
+        self.sio.on("boxphoneTextSubmission", self.boxphoneTextSubmission)
         
     def run(self):
         '''start the server'''
@@ -85,7 +87,21 @@ class Host:
         # TODO need to add image/name to game and associate with sid
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
-    
+
+    def boxphonedrawingSubmission(self, sid, imageData, name):
+        imageData = imageData.replace('data:image/png;base64,', '')
+        img_data = str.encode(imageData)
+        path = os.path.join(os.curdir, f"images/{sid}_{name}.png")
+        # TODO need to add image/name to game and associate with sid
+        with open(path, "wb") as fh:
+            fh.write(base64.decodebytes(img_data))
+        self.image_prompts_q.put({sid:path})
+        print(f"Player {name} submitted an image response")
+
+    def boxphonetextSubmission(self, sid, text, name):
+        self.text_prompts_q.put({sid:text})
+        print(f"Player {name} submitted a text response")
+
     def drawingVote(self, sid, side):
         # TODO need to send 0 or 1 to game function
         if(side == "left"):

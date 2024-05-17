@@ -73,19 +73,19 @@ playerSetup = () => {
         drawSomeVote();
     });
     socket.on("boxphoneWait", () => {
-        //boxphone();
+        boxphoneWait();
     });
     socket.on("boxphoneFirstWrite", () => {
-        //boxphone();
+        boxphoneFirstWrite();
     });
-    socket.on("boxphoneWrite", (imagePrompt) => {
-        //boxphone();
+    socket.on("boxphoneWrite", (prevImage) => {
+        boxphoneWrite(prevImage);
     });
-    socket.on("boxphoneDraw", (textPrompt) => {
-        //boxphone();
+    socket.on("boxphoneDraw", (prevText) => {
+        boxphoneDraw(prevText);
     });
     socket.on("boxphoneResults", (textPrompts, imagePrompts) => {
-        //boxphone();
+        boxphoneResults(textPrompts, imagePrompts);
     });
     socket.on("timesUp", () => {
         timesUp.play();
@@ -231,6 +231,155 @@ drawSomeVote = () => {
         click.play();
         socket.emit("drawingVote", "right");
         clearPage();
+    }
+    unveil.play();
+}
+
+
+/* TODO: Implement boxphone functions
+boxphoneWait();
+boxphoneFirstWrite();
+boxphoneWrite(prevImage);
+boxphoneResults(textPrompts, imagePrompts);
+*/
+
+boxphoneWrite = (prevImage) => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+            <div class="LHpopup">
+                <div class="sideBySide">
+                    <div class="entryGroup">
+                        <div class="popupHeader">Box Phone!</div>
+                        <div class="popupSubheader">Previous player's drawing:</div>
+                        <!--<img id="prevImageArea">This player didn't submit anything... Good luck!</img>-->
+                        <div class="popupSubheader">Write your response and click submit before time runs out!</div>
+                        <div class="sideBySide">
+                            <input id="nameEntry" class="textInput" maxlength="20" spellcheck="false" placeholder="(ex: Super funny drawing)" style="margin-right:1vw; font-size: 3vh;">
+                            <button id="boxphoneSubmitButton">Submit</button>
+                        </div>
+                    </div>
+                    <div class="paintArea">
+                        <canvas id="paintCanvas"></canvas>
+                        <div style="display: flex; flex-direction: row; flex-wrap: nowrap;">
+                            <div class="clr" data-clr="#000000"></div>
+                            <div class="clr" data-clr="#FF0000"></div>
+                            <div class="clr" data-clr="#FF8800"></div>
+                            <div class="clr" data-clr="#FFFF00"></div>
+                            <div class="clr" data-clr="#00FF00"></div>
+                            <div class="clr" data-clr="#0000FF"></div>
+                            <div class="clr" data-clr="#8800FF"></div>
+                            <div class="clr" data-clr="#FFFFFF"></div>
+                            <div class="clr" data-clr="#E6C25D"></div>
+                        </div>
+                        <input id="slider" class="rangeSlider" type="range" min="3" max="7" value="3">
+                    </div>
+                    <script src="scripts/draw.js"></script>
+                    <!-- courtesy of https://dev.to/0shuvo0/lets-create-a-drawing-app-with-js-4ej3 -->
+                </div>
+            </div>
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
+    var newScript = document.createElement('script');
+    newScript.type = 'text/javascript';
+    newScript.src = 'scripts/draw.js';
+    newScript.id = 'canvasScript';
+    document.getElementsByTagName('head')[0].appendChild(newScript);
+
+    // Change the text to be the one from previous player
+    document.getElementById("prevTextArea").innerHTML = prevText;
+
+
+    const textInput = document.getElementById("textInput");
+    let saveBtn = document.getElementById("boxphoneSubmitButton");
+    saveBtn.addEventListener("click", () => {
+        let data = textInput.innerHTML;
+        let name = document.getElementById("nameEntry").value;
+        if(name == "") {
+            return;
+        }
+        console.log(data);
+        console.log(name);
+        socket.emit("boxphoneTextSubmission", textResponse, name);
+        click.play();
+        clearPage()
+    })
+    unveil.play();
+}
+
+// page for drawing images in boxphone game
+boxphoneDraw = (prevText) => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+            <div class="LHpopup">
+                <div class="sideBySide">
+                    <div class="entryGroup">
+                        <div class="popupHeader">Box Phone!</div>
+                        <div class="popupSubheader">Previous player's description:</div>
+                        <p id="prevTextArea">This player didn't submit anything... Good luck!</p>
+                        <div class="popupSubheader">Draw your response and click submit before time runs out!</div>
+                        <div class="sideBySide">
+                            <input id="nameEntry" class="textInput" maxlength="20" spellcheck="false" placeholder="(ex: Super funny drawing)" style="margin-right:1vw; font-size: 3vh;">
+                            <button id="boxphoneSubmitButton">Submit</button>
+                        </div>
+                    </div>
+                    <div class="paintArea">
+                        <canvas id="paintCanvas"></canvas>
+                        <div style="display: flex; flex-direction: row; flex-wrap: nowrap;">
+                            <div class="clr" data-clr="#000000"></div>
+                            <div class="clr" data-clr="#FF0000"></div>
+                            <div class="clr" data-clr="#FF8800"></div>
+                            <div class="clr" data-clr="#FFFF00"></div>
+                            <div class="clr" data-clr="#00FF00"></div>
+                            <div class="clr" data-clr="#0000FF"></div>
+                            <div class="clr" data-clr="#8800FF"></div>
+                            <div class="clr" data-clr="#FFFFFF"></div>
+                            <div class="clr" data-clr="#E6C25D"></div>
+                        </div>
+                        <input id="slider" class="rangeSlider" type="range" min="3" max="7" value="3">
+                    </div>
+                    <script src="scripts/draw.js"></script>
+                    <!-- courtesy of https://dev.to/0shuvo0/lets-create-a-drawing-app-with-js-4ej3 -->
+                </div>
+            </div>
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
+    var newScript = document.createElement('script');
+    newScript.type = 'text/javascript';
+    newScript.src = 'scripts/draw.js';
+    newScript.id = 'canvasScript';
+    document.getElementsByTagName('head')[0].appendChild(newScript);
+
+    // Change the text to be the one from previous player
+    document.getElementById("prevTextArea").innerHTML = prevText;
+
+
+    const canvas = document.getElementById("paintCanvas");
+    let saveBtn = document.getElementById("boxphoneSubmitButton");
+    saveBtn.addEventListener("click", () => {
+        let data = canvas.resizeAndExport(256, 256);
+        let name = document.getElementById("nameEntry").value;
+        if(name == "") {
+            return;
+        }
+        console.log(data);
+        console.log(name);
+        // let a = document.createElement("a");
+        // a.href = data;
+        // a.download = "sketch.png";
+        // a.click();
+        socket.emit("boxphoneDrawingSubmission", data, name);
+        click.play();
+        document.getElementById("canvasScript").remove();
+        clearPage()
+    })
+    canvas.resizeAndExport = function(width, height){
+        var c = document.createElement('canvas');
+        c.width = width;
+        c.height = height;
+        c.getContext('2d').drawImage(this, 0, 0, this.width, this.height, 0, 0, width, height);
+        return c.toDataURL();
     }
     unveil.play();
 }
