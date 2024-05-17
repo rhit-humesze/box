@@ -25,6 +25,10 @@ class Game:
         self.HEIGHT: int = height
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Box")
+        pygame.mixer.init()
+        pygame.mixer.music.load(f"{assetPath}music_light_funky.mp3")
+        pygame.mixer.music.set_volume(0.7) 
+        pygame.mixer.music.play()
         self.game_state: str = 'start-screen'
         self.running = False
         self.code = code
@@ -259,6 +263,9 @@ class Game:
                 self.create_button((300,400),(280,80),text="Draw Some", method="center",font_size=32)
                 self.create_button((900,400),(280,80),text="Box Phone", method="center",font_size=32)
             elif self.game_state == 'draw-some-screen':
+                pygame.mixer.music.load(f"{assetPath}music_heavy_electric.mp3") 
+                pygame.mixer.music.pause() 
+                pygame.mixer.music.play()
                 text = self.renderText("Draw some!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
@@ -269,8 +276,14 @@ class Game:
                     self.game_state = "draw-some-tournament-screen"
                     self.start_ticks = pygame.time.get_ticks()
             elif self.game_state == "draw-some-tournament-screen":
+                pygame.mixer.music.load(f"{assetPath}music_light_electric.mp3") 
+                pygame.mixer.music.pause() 
+                pygame.mixer.music.play()
                 self.draw_some_tournament()
             elif self.game_state == "draw-some-won-screen":
+                pygame.mixer.music.load(f"{assetPath}music_light_funky.mp3") 
+                pygame.mixer.music.pause() 
+                pygame.mixer.music.play()
                 text = self.renderText("Winner: " + self.draw_some_winner.player_name + "!", fontColor, 80, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
