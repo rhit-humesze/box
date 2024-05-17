@@ -279,7 +279,7 @@ clearPage = () => {
         `<div id="pageContent"></div>`);
     document.querySelector('body').appendChild(setupPage);
     load = document.createElement("img");
-    load.src = "assets/loading.gif";
+    load.src = "assets/await.gif";
     load.style = "position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);";
     document.getElementById('pageContent').appendChild(load);
     unveil.play();
@@ -289,7 +289,7 @@ clearPage = () => {
 phoneGame = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
-        `<div id="pageContent"></div>`);
+        `<div id="pageContent"><div class="LHpopup"></div></div>`);
     document.querySelector('body').appendChild(setupPage);
     tf = document.createElement("img");
     tf.src = "assets/test_img1.png";
