@@ -41,13 +41,13 @@ class Host:
                 msg = self.msg_q.get()
                 if msg == 0:
                     self.sio.emit("drawSomeDraw")
-                    print("\nstarting drawing round\n")
+                    # print("\nstarting drawing round\n")
                 elif msg == 1:
                     self.sio.emit("timesUp")
-                    print("\nTIMES UP!!!\n")
+                    # print("\nTIMES UP!!!\n")
                 elif msg == 2:
                     self.sio.emit("drawSomeVote")
-                    print("\nstarting voting round\n")
+                    # print("\nstarting voting round\n")
             eventlet.sleep(0.1)  # Sleep briefly to prevent a tight loop
 
     def start_server(self):

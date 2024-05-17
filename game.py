@@ -262,6 +262,7 @@ class Game:
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
                 time_left = self.timer(60, (600,500), 400)
+                self.recv_drawings()
                 if time_left == 0:
                     self.msg_q.put(1)
                     self.game_state = "draw-some-tournament-screen"
