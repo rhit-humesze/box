@@ -48,6 +48,7 @@ class Game:
         self.right_sid = None
         self.round_time = 0
         self.intermission_time = 0
+        self.draw_some_winner = DrawingData('test_img3.png', 'test3', 'big kimmy j')
 
         self._circle_cache = {}
         self.clock = pygame.time.Clock()
@@ -202,10 +203,10 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
-        for i in range(1, 4):
-            self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
+        # for i in range(1, 4):
+        #     self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        self.game_state = 'draw-some-tournament-screen'
+        # self.game_state = 'draw-some-won-screen'
 
         while self.running:
             # create background image tiling
@@ -220,24 +221,24 @@ class Game:
                 self.recv_players()
                 self.check_disc_players()
                 # Display generated code
-                text = self.renderText("Box code: " + self.code, fontColor, 48, darkColor, 3)
+                text = self.renderText("Box #:" + self.code, fontColor, 96, darkColor, 3)
                 text_rect = text.get_rect(topleft=(120,100))
                 self.screen.blit(text, text_rect)
                 # Check here if len players >= 3
                 if len(self.players) < 3:
                     text = self.renderText("You need at least 3 players to start!", fontColor, 28, darkColor, 3)
-                    text_rect = text.get_rect(topleft=(120,150))
+                    text_rect = text.get_rect(topleft=(120,185))
                     self.screen.blit(text, text_rect)
                 else:
                     self.create_button((800,100),(280,120),text="Start game", font_size=42)
                 text = self.renderText("Players:", fontColor, 42, darkColor, 3)
-                text_rect = text.get_rect(topleft=(120, 180))
+                text_rect = text.get_rect(topleft=(120, 220))
                 self.screen.blit(text, text_rect)
                 
                 #player stuff
                 horizontal_spacing = 100 
                 vertical_spacing = 40 
-                top_margin = 230  
+                top_margin = 270  
                 left_margin = 120  
                 x_pos = left_margin
                 y_pos = top_margin
@@ -271,9 +272,13 @@ class Game:
             elif self.game_state == "draw-some-tournament-screen":
                 self.draw_some_tournament()
             elif self.game_state == "draw-some-won-screen":
-                text = self.renderText("Epic!", fontColor, 128, darkColor, 3)
+                text = self.renderText("Winner: " + self.draw_some_winner.player_name + "!", fontColor, 80, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
+                border_rect = pygame.Rect(0, 0, 520, 520)
+                border_rect.center = (self.WIDTH / 2, self.HEIGHT / 2 + 50)
+                pygame.draw.rect(self.screen, pygame.Color(darkColor), border_rect)
+                self.render_drawing(self.draw_some_winner.image, (self.WIDTH / 2, self.HEIGHT / 2 + 50), (500,500))
             else:
                 pass
             pygame.display.flip()
@@ -284,7 +289,9 @@ class Game:
 
     def draw_some_tournament(self):
         if(len(self.drawings) == 1):
+            self.msg_q.put(3)
             self.game_state = "draw-some-won-screen"
+            return
 
         ### DEBUG ###
         # self.drawing_votes.update({1:1})
@@ -347,7 +354,7 @@ class Game:
 
         #logic that happens while round is not done yet
         if not self.round_over:
-            self.round_time = self.timer(10, (self.WIDTH / 2, 100), 64)
+            self.round_time = self.timer(10, (self.WIDTH / 2, 100), 96)
             temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
             temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
             self.screen.blit(temp_text, temp_rect)
@@ -368,7 +375,7 @@ class Game:
             else:
                 winner = self.left_drawing
                 winner_side = 0
-
+            self.draw_some_winner = winner
             #wait a bit
             if not self.intermission_over:
                 #disallow timer to be set
@@ -381,6 +388,7 @@ class Game:
             
             #end intermission
             if (self.intermission_time < 0):
+                self.drawing_votes = {}
                 self.broadcast_vote = False
                 #send msg that intermission is over
                 #allow timer to be set
@@ -391,9 +399,6 @@ class Game:
                 self.round_over = False
                 self.round_time = 0
                 if winner_side == 0:
-                    # print(self.drawings.keys())
-                    # print(self.drawings[list(self.drawings.keys())[1]].title)
-                    # print(f"{(list(self.drawings.keys())[1] == self.right_sid)}")
                     self.drawings.pop(self.right_sid)
                     self.right_occupied = False
                 elif winner_side == 1:
@@ -428,7 +433,7 @@ class Game:
         if total == 0:
             return 0, 0
         else:
-            return round(votes_left / total, 3) * 100, round(votes_right / total, 3) * 100
+            return round((votes_left / total) * 100, 3), round((votes_right / total) * 100, 3)
 
 
     def render_drawing(self, image_path, coords, dimensions):
