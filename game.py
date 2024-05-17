@@ -332,35 +332,26 @@ class Game:
             elif percent_left > percent_right:
                 winner = self.left_drawing
             else:
+                #TODO: track previous winner to break tie
                 pass
-            temp_text = self.renderText("Round winner: " + winner.title + "!", fontColor, 48, darkColor, 2)
-            temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
-            self.screen.blit(temp_text, temp_rect)
+
+            #wait a bit
+            if not self.intermission_over:
+                self.intermission_time = self.timer(3, (0,0), 0)
+                temp_text = self.renderText("Round winner: " + winner.title + "!", fontColor, 48, darkColor, 2)
+                temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
+                self.screen.blit(temp_text, temp_rect)
+            
+            
+            if (self.intermission_time < 0):
+                #reset bools
+                self.intermission_over = False
+                self.round_over = False
 
         # (len(self.drawing_votes) == len(self.players))
         if (self.round_time < 0):
             self.round_over = True
 
-        
-
-    # def recv_votes(self):
-    #     self.drawing_votes.update({1:1})
-    #     self.drawing_votes.update({2:0})
-    #     print(idx)
-    #     # or (len(self.drawing_votes) == len(self.players))
-    #     if (time == 0):
-    #         #calculate winner
-    #         percent_left, percent_right = self.get_vote_percents()
-    #         print(percent_left, percent_right)
-    #         #draw percentage text
-    #         # temp_text = self.renderText(str(percent_left) + , fontColor, 64, darkColor, 2)
-    #         # temp_rect = temp_text.get_rect(center=left_center)
-    #         # self.screen.blit(temp_text, temp_rect)
-
-    #         # temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
-    #         # temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
-    #         # self.screen.blit(temp_text, temp_rect)
-    #         #next round
 
     def get_vote_percents(self):
         votes_left = 0
