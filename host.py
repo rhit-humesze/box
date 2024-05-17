@@ -4,7 +4,7 @@ import socketio
 from queue import Queue
 
 class Host:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue):
         self.sio = socketio.Server(cors_allowed_origins="*")
         self.app = socketio.WSGIApp(self.sio)
         self.players = {}

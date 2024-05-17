@@ -17,7 +17,7 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, 
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue,
                  width=1200, height=800):
         '''initialize Game'''
         pygame.init()
@@ -32,15 +32,21 @@ class Game:
         self.drawings = {}
         self.drawing_votes = {}
 
+        self.start_ticks_lock = False
+
         #drawing game bools
         self.left_occupied = False
         self.right_occupied = False
         self.round_over = False
+        self.intermission_over = True
 
         #drawing game vars
         self.left_drawing = None
         self.right_drawing = None
+        self.left_sid = None
+        self.right_sid = None
         self.round_time = 0
+        self.intermission_time = 0
 
         self._circle_cache = {}
         self.clock = pygame.time.Clock()
@@ -48,6 +54,8 @@ class Game:
 
         self.join_q = join_q
         self.disc_q = disc_q
+        self.draw_q = draw_q
+        self.vote_q = vote_q
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
@@ -186,9 +194,9 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
-        for i in range(1, 3):
+        for i in range(1, 4):
             self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
-        # print(len(self.drawings))
+        print(len(self.drawings))
         self.game_state = 'draw-some-tournament-screen'
 
         while self.running:
@@ -250,6 +258,7 @@ class Game:
                 time_left = self.timer(45, (600,500), 400)
                 if time_left == 0:
                     self.game_state = "draw-some-name-screen"
+                    self.start_ticks = 0
             elif self.game_state == "draw-some-name-screen":
                 text = self.renderText("Name your masterpiece!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
@@ -259,8 +268,13 @@ class Game:
                 #if timer ends or all players have submitted
                 if time_left == 0:
                     self.game_state = "draw-some-tournament-screen"
+                    self.start_ticks = 0
             elif self.game_state == "draw-some-tournament-screen":
                 self.draw_some_tournament()
+            elif self.game_state == "draw-some-won-screen":
+                text = self.renderText("Epic!", fontColor, 128, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
             else:
                 pass
             pygame.display.flip()
@@ -270,6 +284,9 @@ class Game:
 
 
     def draw_some_tournament(self):
+        if(len(self.drawings) == 1):
+            self.game_state = "draw-some-won-screen"
+
         ### DEBUG ###
         self.drawing_votes.update({1:1})
 
@@ -287,14 +304,20 @@ class Game:
         temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, self.HEIGHT / 2))
         self.screen.blit(temp_text, temp_rect)
 
-        if not (self.left_occupied and self.right_occupied):
+        if not (self.left_occupied and self.right_occupied):   
+            print(self.round_time) 
             for idx, (sid, drawing) in enumerate(self.drawings.items()):
+                # print(len(self.drawings))
+                if (drawing == self.left_drawing) or drawing == (self.right_drawing):
+                    continue 
                 if not self.left_occupied:
                     self.left_occupied = True
                     self.left_drawing = drawing
+                    self.left_sid = sid
                 elif not self.right_occupied:
                     self.right_occupied = True
                     self.right_drawing = drawing
+                    self.right_sid = sid
                 if self.right_occupied and self.left_occupied:
                     break
         
@@ -309,6 +332,9 @@ class Game:
         temp_text = self.renderText(self.right_drawing.title, fontColor, 64, darkColor, 2)
         temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
         self.screen.blit(temp_text, temp_rect)
+
+        #recv votes
+        self.recv_draw_votes()
 
         percent_left, percent_right = self.get_vote_percents()
         # draw percentage text
@@ -327,30 +353,59 @@ class Game:
             self.screen.blit(temp_text, temp_rect)
         else:
             #declare winner
+            #0 for left 1 for right
+            winner_side = None
             if percent_left < percent_right:
                 winner = self.right_drawing
+                winner_side = 1
             elif percent_left > percent_right:
                 winner = self.left_drawing
+                winner_side = 0
             else:
                 #TODO: track previous winner to break tie
                 pass
 
             #wait a bit
             if not self.intermission_over:
+                #disallow timer to be set
+                self.start_ticks_lock = True
                 self.intermission_time = self.timer(3, (0,0), 0)
+                # print(self.intermission_time)
                 temp_text = self.renderText("Round winner: " + winner.title + "!", fontColor, 48, darkColor, 2)
                 temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
                 self.screen.blit(temp_text, temp_rect)
             
-            
+            #end intermission
             if (self.intermission_time < 0):
+                #allow timer to be set
+                self.start_ticks_lock = False
+                self.start_ticks = pygame.time.get_ticks()
                 #reset bools
-                self.intermission_over = False
+                self.intermission_over = True
                 self.round_over = False
+                self.round_time = 0
+                if winner_side == 0:
+                    # print(self.drawings.keys())
+                    # print(self.drawings[list(self.drawings.keys())[1]].title)
+                    # print(f"{(list(self.drawings.keys())[1] == self.right_sid)}")
+                    self.drawings.pop(self.right_sid)
+                    self.right_occupied = False
+                elif winner_side == 1:
+                    # self.drawings.pop(self.left_sid)
+                    self.left_occupied = False
 
         # (len(self.drawing_votes) == len(self.players))
         if (self.round_time < 0):
+            if not self.start_ticks_lock:
+                self.start_ticks = pygame.time.get_ticks()
             self.round_over = True
+            self.intermission_over = False
+
+    def recv_draw_votes(self):
+        '''get votes from the votes queue and add them'''
+        while not self.vote_q.empty():
+            vote_entry = self.vote_q.get()
+            self.drawing_votes.update(vote_entry)
 
 
     def get_vote_percents(self):
