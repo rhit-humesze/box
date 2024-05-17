@@ -45,7 +45,7 @@ codeEntry = () => {
         clickable = false;
         console.log(boxCode);
         click.play();
-        var serverLobby = "https://" + "137.112.227.249" + ":5100/"
+        var serverLobby = "https://" + "137.112.226.137" + ":5100/"
         socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
         socket.on("connect_error", (error) => {
             socket.close()
@@ -86,7 +86,7 @@ playerSetup = () => {
         console.log(error.message);
         timesUp.play()
         codeEntry()
-      });
+    });
     socket.on("connect", () => {
         socket.emit("userName", playerusername);
     });
@@ -278,6 +278,10 @@ clearPage = () => {
     var setupPage = htmlToElement(
         `<div id="pageContent"></div>`);
     document.querySelector('body').appendChild(setupPage);
+    load = document.createElement("img");
+    load.src = "assets/loading.gif";
+    load.style = "position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);";
+    document.getElementById('pageContent').appendChild(load);
     unveil.play();
 }
 

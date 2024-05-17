@@ -103,7 +103,7 @@ class Host:
     def drawingSubmission(self, sid, imageData, name):
         imageData = imageData.replace('data:image/png;base64,', '')
         img_data = str.encode(imageData)
-        filepath = f"images/{sid}_{name}.png"
+        filepath = f"images/{sid}_{name.replace(' ','_').replace("\\", '').replace("/", '')}.png"
         path = os.path.join(os.curdir, filepath)
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
