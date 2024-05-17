@@ -175,9 +175,10 @@ class Game:
         elapsed_ticks = pygame.time.get_ticks() - self.start_ticks
         elapsed_seconds = elapsed_ticks // 1000
         time_left = start_time - elapsed_seconds
-        timer_text = self.renderText(f"{time_left}", fontColor, font_size, darkColor, 3)
-        text_rect = timer_text.get_rect(center=coords)
-        self.screen.blit(timer_text, text_rect)
+        if elapsed_seconds >= 0:
+            timer_text = self.renderText(f"{time_left}", fontColor, font_size, darkColor, 3)
+            text_rect = timer_text.get_rect(center=coords)
+            self.screen.blit(timer_text, text_rect)
         return time_left
 
     def recv_players(self):
@@ -204,7 +205,7 @@ class Game:
         for i in range(1, 4):
             self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
         # print(len(self.drawings))
-        # self.game_state = 'select-screen'
+        self.game_state = 'draw-some-tournament-screen'
 
         while self.running:
             # create background image tiling
@@ -380,7 +381,6 @@ class Game:
             
             #end intermission
             if (self.intermission_time < 0):
-                self.drawing_votes.clear()
                 self.broadcast_vote = False
                 #send msg that intermission is over
                 #allow timer to be set
@@ -400,7 +400,8 @@ class Game:
                     self.drawings.pop(self.left_sid)
                     self.left_occupied = False
 
-        if (self.round_time < 0) or (len(self.drawing_votes) == len(self.players)):
+        # (len(self.drawing_votes) == len(self.players))
+        if (self.round_time < 0):
             if not self.start_ticks_lock:
                 #send msg that round is over
                 self.msg_q.put(1)
