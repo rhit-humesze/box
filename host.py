@@ -29,11 +29,20 @@ class Host:
         
     def run(self):
         '''start the server'''
-        # serv_thread = threading.Thread(target=self.start_server)
-        # serv_thread.start()
+        serv_thread = threading.Thread(target=self.start_server)
+        serv_thread.start()
+
+        msg_handler_thread = threading.Thread(target=self.server_message_handler)
+        msg_handler_thread.start()
         # serv_thread.join()
-        self.start_server()
+        # self.start_server()
     
+    def server_message_handler(self):
+        while True:
+            if not self.msg_q.empty():
+                msg = self.msg_q.get()
+                print(msg)
+
     def start_server(self):
         self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 
                                         certfile='./host.cert', 
