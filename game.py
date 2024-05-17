@@ -17,9 +17,7 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue,
-                 image_prompts_q: Queue, text_prompts_q: Queue,
-                 width=1200, height=800):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue, image_prompts_q: Queue, text_prompts_q: Queue, width=1200, height=800):
         '''initialize Game'''
         pygame.init()
         self.WIDTH:  int = width
@@ -33,16 +31,38 @@ class Game:
         self.drawings = {}
         self.text_prompts = {}
         self.image_prompts = {}
+        self.drawing_votes = {}
+
+        self.start_ticks_lock = False
+
+        #drawing game bools
+        self.left_occupied = False
+        self.right_occupied = False
+        self.round_over = False
+        self.intermission_over = True
+
+        #drawing game vars
+        self.left_drawing = None
+        self.right_drawing = None
+        self.left_sid = None
+        self.right_sid = None
+        self.round_time = 0
+        self.intermission_time = 0
 
         self._circle_cache = {}
         self.clock = pygame.time.Clock()
         self.start_ticks = 0
 
+        #intake queues
         self.join_q = join_q
         self.disc_q = disc_q
         self.draw_q = draw_q
         self.image_prompts_q = image_prompts_q
         self.text_prompts_q = text_prompts_q
+        self.vote_q = vote_q
+
+        #msg queue
+        self.msg_q = msg_q
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
@@ -98,9 +118,11 @@ class Game:
                         if len(self.players) >= 3 and self.check_within_bounds((800,100),(280,120), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'select-screen'
                     elif self.game_state == 'select-screen':
-                        # self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
-                        if self.check_within_bounds((600,400),(280,120), mouse_x, mouse_y, "center"):
+                        if self.check_within_bounds((300,400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
+                            #send msg to host
+                            print("should send message here")
+                            self.msg_q.put("lalalala")
                             self.game_state = 'draw-some-screen'
                         if self.check_within_bounds((1000,400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
@@ -194,12 +216,10 @@ class Game:
         '''main loop for the game screen'''
         self.running = True
         ### DEBUGGING PURPOSES ###
-        '''
-        for i in range(0, 10):
-            self.drawings.update({i:DrawingData('test_img.png', 'test', 'player')})
-        print(len(self.drawings))
-        self.game_state = 'draw-some-tournament-screen'
-        '''
+        for i in range(1, 4):
+            self.drawings.update({i:DrawingData('test_img' + str(i) + '.png', 'test' + str(i), 'player')})
+        # print(len(self.drawings))
+        self.game_state = 'select-screen'
 
         while self.running:
             # create background image tiling
@@ -250,25 +270,16 @@ class Game:
                     self.screen.blit(player_text, player_rect)
                     x_pos += player_rect.width + horizontal_spacing
             elif self.game_state == 'select-screen':
-                self.create_button((200,400),(280,80),text="Placeholder 1", method="center",font_size=32)
-                self.create_button((600,400),(280,80),text="Draw Some", method="center",font_size=32)
-                self.create_button((1000,400),(280,80),text="Boxphone", method="center",font_size=32)
+                self.create_button((300,400),(280,80),text="Draw Some", method="center",font_size=32)
+                self.create_button((900,400),(280,80),text="Box Phone", method="center",font_size=32)
             elif self.game_state == 'draw-some-screen':
                 text = self.renderText("Draw some!", fontColor, 128, darkColor, 3)
                 text_rect = text.get_rect(center=(self.WIDTH / 2,100))
                 self.screen.blit(text, text_rect)
-                time_left = self.timer(45, (600,500), 400)
-                if time_left == 0:
-                    self.game_state = "draw-some-name-screen"
-            elif self.game_state == "draw-some-name-screen":
-                text = self.renderText("Name your masterpiece!", fontColor, 128, darkColor, 3)
-                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
-                self.screen.blit(text, text_rect)
-                time_left = self.timer(15, (600,500), 400)
-                self.recv_drawings()
-                #if timer ends or all players have submitted
+                time_left = self.timer(60, (600,500), 400)
                 if time_left == 0:
                     self.game_state = "draw-some-tournament-screen"
+                    self.start_ticks = pygame.time.get_ticks()
             elif self.game_state == "draw-some-tournament-screen":
                 self.draw_some_tournament()
             elif self.game_state == "boxphone-play-screen":
@@ -281,6 +292,10 @@ class Game:
                     self.game_state = "boxphone-results-screen"
             elif self.game_state == "boxphone-results-screen":
                 print("Display boxphone game results")
+            elif self.game_state == "draw-some-won-screen":
+                text = self.renderText("Epic!", fontColor, 128, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
             else:
                 pass
             pygame.display.flip()
@@ -288,7 +303,14 @@ class Game:
 
         self.stop()
 
+
     def draw_some_tournament(self):
+        if(len(self.drawings) == 1):
+            self.game_state = "draw-some-won-screen"
+
+        ### DEBUG ###
+        self.drawing_votes.update({1:1})
+
         img_rect1 = pygame.Rect(0, 0, 400, 400)
         left_center = (300, 400)
         img_rect1.center = left_center
@@ -299,24 +321,129 @@ class Game:
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect1)
         pygame.draw.rect(self.screen, pygame.Color(darkColor), img_rect2)
 
-        left_occupied = False
-        right_occupied = False
-        for idx, (sid, drawing) in enumerate(self.drawings.items()):
-            if not left_occupied:
-                self.render_drawing(drawing.image, left_center, (380, 380))
-                temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
-                temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] - 240))
-                self.screen.blit(temp_text, temp_rect)
-                left_occupied = True
-                continue
-            if not right_occupied:
-                temp_text = self.render_drawing(drawing.image, right_center, (380, 380))
-                temp_text = self.renderText(drawing.title, fontColor, 64, darkColor, 2)
-                temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
-                self.screen.blit(temp_text, temp_rect)
-                right_occupied = True
-                continue
+        temp_text = self.renderText("VS.", fontColor, 96, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, self.HEIGHT / 2))
+        self.screen.blit(temp_text, temp_rect)
+
+        if not (self.left_occupied and self.right_occupied):   
+            print(self.round_time) 
+            for idx, (sid, drawing) in enumerate(self.drawings.items()):
+                # print(len(self.drawings))
+                if (drawing == self.left_drawing) or drawing == (self.right_drawing):
+                    continue 
+                if not self.left_occupied:
+                    self.left_occupied = True
+                    self.left_drawing = drawing
+                    self.left_sid = sid
+                elif not self.right_occupied:
+                    self.right_occupied = True
+                    self.right_drawing = drawing
+                    self.right_sid = sid
+                if self.right_occupied and self.left_occupied:
+                    break
         
+        #draw left drawing
+        self.render_drawing(self.left_drawing.image, left_center, (380, 380))
+        temp_text = self.renderText(self.left_drawing.title, fontColor, 64, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] - 240))
+        self.screen.blit(temp_text, temp_rect)
+
+        #draw right drawing
+        temp_text = self.render_drawing(self.right_drawing.image, right_center, (380, 380))
+        temp_text = self.renderText(self.right_drawing.title, fontColor, 64, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] - 240))
+        self.screen.blit(temp_text, temp_rect)
+
+        #recv votes
+        self.recv_draw_votes()
+
+        percent_left, percent_right = self.get_vote_percents()
+        # draw percentage text
+        temp_text = self.renderText(str(percent_left) + '%', fontColor, 48, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(left_center[0], left_center[1] + 250))
+        self.screen.blit(temp_text, temp_rect)
+
+        temp_text = self.renderText(str(percent_right) + '%', fontColor, 48, darkColor, 2)
+        temp_rect = temp_text.get_rect(center=(right_center[0], right_center[1] + 250))
+        self.screen.blit(temp_text, temp_rect)
+
+        if not self.round_over:
+            self.round_time = self.timer(10, (self.WIDTH / 2, 100), 64)
+            temp_text = self.renderText("King of the hill! Pick your favorite!", fontColor, 48, darkColor, 2)
+            temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
+            self.screen.blit(temp_text, temp_rect)
+        else:
+            #declare winner
+            #0 for left 1 for right
+            winner_side = None
+            if percent_left < percent_right:
+                winner = self.right_drawing
+                winner_side = 1
+            elif percent_left > percent_right:
+                winner = self.left_drawing
+                winner_side = 0
+            else:
+                #TODO: track previous winner to break tie
+                pass
+
+            #wait a bit
+            if not self.intermission_over:
+                #disallow timer to be set
+                self.start_ticks_lock = True
+                self.intermission_time = self.timer(3, (0,0), 0)
+                # print(self.intermission_time)
+                temp_text = self.renderText("Round winner: " + winner.title + "!", fontColor, 48, darkColor, 2)
+                temp_rect = temp_text.get_rect(center=(self.WIDTH / 2, 720))
+                self.screen.blit(temp_text, temp_rect)
+            
+            #end intermission
+            if (self.intermission_time < 0):
+                #allow timer to be set
+                self.start_ticks_lock = False
+                self.start_ticks = pygame.time.get_ticks()
+                #reset bools
+                self.intermission_over = True
+                self.round_over = False
+                self.round_time = 0
+                if winner_side == 0:
+                    # print(self.drawings.keys())
+                    # print(self.drawings[list(self.drawings.keys())[1]].title)
+                    # print(f"{(list(self.drawings.keys())[1] == self.right_sid)}")
+                    self.drawings.pop(self.right_sid)
+                    self.right_occupied = False
+                elif winner_side == 1:
+                    # self.drawings.pop(self.left_sid)
+                    self.left_occupied = False
+
+        # (len(self.drawing_votes) == len(self.players))
+        if (self.round_time < 0):
+            if not self.start_ticks_lock:
+                self.start_ticks = pygame.time.get_ticks()
+            self.round_over = True
+            self.intermission_over = False
+
+    def recv_draw_votes(self):
+        '''get votes from the votes queue and add them'''
+        while not self.vote_q.empty():
+            vote_entry = self.vote_q.get()
+            self.drawing_votes.update(vote_entry)
+
+
+    def get_vote_percents(self):
+        votes_left = 0
+        votes_right = 0
+        for idx, (sid, vote) in enumerate(self.drawing_votes.items()):
+            if vote:
+                votes_left += 1
+            else:
+                votes_right += 1
+        total = votes_left + votes_right
+        if total == 0:
+            return 0, 0
+        else:
+            return round(votes_left / total, 3) * 100, round(votes_right / total, 3) * 100
+
+
     def render_drawing(self, image_path, coords, dimensions):
         image = pygame.image.load(image_path)
         image = pygame.transform.scale(image, dimensions)

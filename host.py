@@ -1,31 +1,47 @@
 import eventlet
 import socketio
+import threading
+import base64
+import os
 
 from queue import Queue
 
 class Host:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue,
-                 image_prompts_q: Queue, text_prompts_q: Queue):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue, image_prompts_q: Queue, text_prompts_q: Queue):
         self.sio = socketio.Server(cors_allowed_origins="*")
         self.app = socketio.WSGIApp(self.sio)
         self.players = {}
         self.gameCode = code
         self.server = None
+
+        #outtake queue
         self.join_q = join_q
         self.disc_q = disc_q
         self.draw_q = draw_q
         self.image_prompts_q = image_prompts_q
         self.text_prompts_q = text_prompts_q
+        self.vote_q = vote_q
+
+        #intake queue
+        self.msg_q = msg_q
         
         # init events
         self.sio.event(self.connect)
         self.sio.event(self.disconnect)
         self.sio.on("gameCode", self.checkCode)
         self.sio.on("userName", self.newUser)
+        self.sio.on("drawingSubmission", self.drawingSubmission)
+        self.sio.on("drawingVote", self.drawingVote)
         
     def run(self):
         '''start the server'''
-        self.server = eventlet.wrap_ssl(eventlet.listen(('137.112.224.241', 5100)), 
+        # serv_thread = threading.Thread(target=self.start_server)
+        # serv_thread.start()
+        # serv_thread.join()
+        self.start_server()
+    
+    def start_server(self):
+        self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 
                                         certfile='./host.cert', 
                                         keyfile='./host.key', 
                                         server_side=True)
@@ -61,6 +77,21 @@ class Host:
         self.players[sid] = data
         self.join_q.put({sid:data})
         self.printServerInfo()
+        
+    def drawingSubmission(self, sid, imageData, name):
+        imageData = imageData.replace('data:image/png;base64,', '')
+        img_data = str.encode(imageData)
+        path = os.path.join(os.curdir, f"images/{sid}_{name}.png")
+        # TODO need to add image/name to game and associate with sid
+        with open(path, "wb") as fh:
+            fh.write(base64.decodebytes(img_data))
+    
+    def drawingVote(self, sid, side):
+        # TODO need to send 0 or 1 to game function
+        if(side == "left"):
+            return 0
+        else:
+            return 1
     
     def stop(self):
         '''safely stop the server'''

@@ -1,13 +1,17 @@
-const canvas = document.getElementById("paintArea")
-canvas.height = window.innerHeight
-canvas.width = window.innerWidth
+const canvas = document.getElementById("paintCanvas")
+var canvasRect = canvas.getBoundingClientRect()
+canvas.width = canvasRect.width
+canvas.height = canvasRect.height
 
 const ctx = canvas.getContext("2d")
+
+ctx.fillStyle = "#E6C25D"
+ctx.fillRect(0, 0, canvasRect.width, canvasRect.height)
 
 let prevX = null
 let prevY = null
 
-ctx.lineWidth = 5
+ctx.lineWidth = 8
 
 let draw = false
 
@@ -19,36 +23,20 @@ clrs.forEach(clr => {
     })
 })
 
-let clearBtn = document.querySelector(".clear")
-clearBtn.addEventListener("click", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-})
-
-// Saving drawing as image
-let saveBtn = document.querySelector(".save")
-saveBtn.addEventListener("click", () => {
-    let data = canvas.toDataURL("imag/png")
-    let a = document.createElement("a")
-    a.href = data
-    // what ever name you specify here
-    // the image will be saved as that name
-    a.download = "sketch.png"
-    a.click()
-})
-
 window.addEventListener("mousedown", (e) => draw = true)
 window.addEventListener("mouseup", (e) => draw = false)
 
 window.addEventListener("mousemove", (e) => {
     if(prevX == null || prevY == null || !draw){
-        prevX = e.clientX
-        prevY = e.clientY
+        prevX = e.clientX - canvasRect.left
+        prevY = e.clientY - canvasRect.top
         return
     }
 
-    let currentX = e.clientX
-    let currentY = e.clientY
+    let currentX = e.clientX - canvasRect.left
+    let currentY = e.clientY - canvasRect.top
 
+    ctx.lineCap = "round"
     ctx.beginPath()
     ctx.moveTo(prevX, prevY)
     ctx.lineTo(currentX, currentY)
@@ -57,3 +45,9 @@ window.addEventListener("mousemove", (e) => {
     prevX = currentX
     prevY = currentY
 })
+
+
+let slider = document.getElementById("slider")
+slider.addEventListener("click", () => {
+    ctx.lineWidth = 2 ** slider.value
+});
