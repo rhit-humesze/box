@@ -98,6 +98,10 @@ playerSetup = () => {
         console.log("drawSomeVote")
         drawSomeVote();
     });
+    socket.on("gameOver", () => {
+        console.log("WINNER!!!1!!")
+        drawSomeWinner();
+    });
     socket.on("timesUp", () => {
         console.log("timesUp")
         timesUp.play();
@@ -248,6 +252,23 @@ drawSomeVote = () => {
     unveil.play();
 }
 
+// page for game being finished
+drawSomeWinner = () => {
+    document.querySelector('#pageContent').remove();
+    var setupPage = htmlToElement(
+        `<div id="pageContent">
+            <div class="RHpopup">
+                <div id="headerGroup">
+                    <div class="popupHeader">Game Over, man!</div>
+                    <div class="popupSubheader">Congrats to the game winner!</div>
+                </div>
+            </div>
+        </div>`);
+    document.querySelector('body').appendChild(setupPage);
+    unveil.play();
+}
+
+// clears the page
 clearPage = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(

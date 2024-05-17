@@ -49,7 +49,7 @@ class Host:
                     self.sio.emit("drawSomeVote")
                     # print("\nstarting voting round\n")
                 elif msg == 3:
-                    self.sio.emit("timesUp")
+                    self.sio.emit("gameOver")
                     filepath = f"images"
                     path = os.path.join(os.curdir, filepath)
                     os.rmdir(path)
