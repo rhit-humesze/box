@@ -1,5 +1,6 @@
 import eventlet
 import socketio
+import threading
 
 from queue import Queue
 
@@ -28,6 +29,12 @@ class Host:
         
     def run(self):
         '''start the server'''
+        # serv_thread = threading.Thread(target=self.start_server)
+        # serv_thread.start()
+        # serv_thread.join()
+        self.start_server()
+    
+    def start_server(self):
         self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 
                                         certfile='./host.cert', 
                                         keyfile='./host.key', 

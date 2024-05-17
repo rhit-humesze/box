@@ -119,7 +119,8 @@ class Game:
                         if self.check_within_bounds((300,400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
                             #send msg to host
-
+                            print("should send message here")
+                            self.msg_q.put("lalalala")
                             self.game_state = 'draw-some-screen'
                     else:
                         pass
