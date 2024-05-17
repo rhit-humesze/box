@@ -107,6 +107,10 @@ playerSetup = () => {
         timesUp.play();
         clearPage();
     });
+    socket.on("awesomeSauce", () => {
+        console.log("teehee");
+        phoneGame();
+    });
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
@@ -281,13 +285,18 @@ clearPage = () => {
 phoneGame = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
-        `<div id="pageContent">
-            <img src="assets/test_img1.png" style="position:fixed;top:0;left:0;width:100vw;height:100vh;">
-        </div>`);
+        `<div id="pageContent"></div>`);
     document.querySelector('body').appendChild(setupPage);
-    print();
-    while(1){
-        unveil.play();
-        console.log("You mad bro?");
-    }
+    tf = document.createElement("img");
+    tf.src = "assets/test_img1.png";
+    tf.style = "position:fixed;top:0;left:0;width:100vw;height:100vh;";
+    document.getElementById('pageContent').appendChild(tf);
+    funny = () => {setTimeout(() => {
+            print();
+            unveil.play();
+            console.log("You mad bro?");
+            funny();
+        },
+    1000);}
+    funny();
 }

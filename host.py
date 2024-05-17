@@ -2,7 +2,6 @@ import eventlet
 import socketio
 import base64
 import os
-import shutil
 from models import DrawingData
 from queue import Queue
 
@@ -50,12 +49,18 @@ class Host:
                     self.sio.emit("drawSomeVote")
                     # print("\nstarting voting round\n")
                 elif msg == 3:
+                    self.sio.emit("awesomeSauce")
+                    # print("\nstarting voting round\n")
+                else:
                     self.sio.emit("gameOver")
                     filepath = f"images"
                     path = os.path.join(os.curdir, filepath)
-                    shutil.rmtree(path)
-                    os.mkdir(path)
+                    for drawing in os.listdir(path):
+                        if(drawing != msg):
+                            drawingPath = os.path.join(filepath, drawing)
+                            os.remove(drawingPath)
                     # print("\nending game\n")
+                    
             eventlet.sleep(0.1)  # Sleep briefly to prevent a tight loop
 
     def start_server(self):
