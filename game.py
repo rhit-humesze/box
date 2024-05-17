@@ -128,6 +128,7 @@ class Game:
                             #send msg to host
                             self.msg_q.put(0)
                             self.game_state = 'draw-some-screen'
+                            self.newMusic = False
                     else:
                         pass
         
@@ -277,6 +278,7 @@ class Game:
                 if time_left == 0:
                     self.msg_q.put(1)
                     self.game_state = "draw-some-tournament-screen"
+                    self.newMusic = False
                     self.start_ticks = pygame.time.get_ticks()
             elif self.game_state == "draw-some-tournament-screen":
                 if(not self.newMusic):
@@ -312,6 +314,7 @@ class Game:
         if(len(self.drawings) == 1):
             self.msg_q.put(self.draw_some_winner.image)
             self.game_state = "draw-some-won-screen"
+            self.newMusic = False
             return
 
         ### DEBUG ###
