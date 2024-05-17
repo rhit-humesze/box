@@ -228,8 +228,8 @@ drawSomeVote = () => {
                 <div class="entryGroup">
                     <div class="popupHeader" style="text-align:center;">Vote!</div>
                     <div class="sideBySide">
-                        <button id="button1">Left!</button>
-                        <button id="button2">Right!</button>
+                        <button id="button1" style="width:256px; height:256px; display:flex; align-items:center; font-size: 5vh;">Left!</button>
+                        <button id="button2" style="width:256px; height:256px; display:flex; align-items:center ;font-size: 5vh;">Right!</button>
                     </div>
                 </div>
             </div>
