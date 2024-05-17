@@ -81,14 +81,14 @@ playerSetup = () => {
     socket.on("boxphoneFirstWrite", () => {
         boxphoneFirstWrite();
     });
-    socket.on("boxphoneWrite", (prevImageData) => {
-        boxphoneWrite(prevImageData);
+    socket.on("boxphoneWrite", (data) => {
+        boxphoneWrite(data);
     });
-    socket.on("boxphoneDraw", (prevText) => {
-        boxphoneDraw(prevText);
+    socket.on("boxphoneDraw", (data) => {
+        boxphoneDraw(data);
     });
-    socket.on("boxphoneResults", (textPrompts, imagePrompts) => {
-        boxphoneResults(textPrompts, imagePrompts);
+    socket.on("boxphoneResults", (data) => {
+        boxphoneResults(data);
     });
     socket.on("timesUp", () => {
         timesUp.play();
@@ -276,7 +276,7 @@ boxphoneFirstWrite = () => {
     const textResponse = document.getElementById("textResponse");
     let saveBtn = document.getElementById("boxphoneSubmitButton");
     saveBtn.addEventListener("click", () => {
-        let data = textResponse.innerHTML;
+        let data = textResponse.value;
         console.log(data);
         socket.emit("boxphoneTextSubmission", data);
         click.play();
@@ -295,7 +295,7 @@ boxphoneWrite = (prevImageData) => {
                         <div class="popupHeader">Box Phone!</div>
                         <div class="popupSubheader">Previous player's drawing:</div>
                         <img id="prevImageArea" src="./public/assets/box_tile.png" alt="Previous Player's Drawing" width="256" height="256"> 
-                        <div class="popupSubheader">Write your response and click submit before time runs out!</div>
+                        <div class="popupSubheader">Write your response and click submit!</div>
                         <input id="textResponse" class="textInput" maxlength="100" spellcheck="false" placeholder="(Ex: A bird feeding it's chicks)" style='font-size:100%;width:clamp(8rem,50vw,30rem) !important' />
                         <button id="boxphoneSubmitButton">Submit</button>
                     </div>
@@ -305,14 +305,13 @@ boxphoneWrite = (prevImageData) => {
     document.querySelector('body').appendChild(setupPage);
 
     // Change the image to be the one from previous player
-    const prevImagePath = `data:image/png;base64,${prevImageData}`;
-    document.getElementById("prevImageArea").src = prevImagePath;
+    document.getElementById("prevImageArea").src = "data:image/png;base64," + prevImageData.toString("base64");
 
 
     const textResponse = document.getElementById("textResponse");
     let saveBtn = document.getElementById("boxphoneSubmitButton");
     saveBtn.addEventListener("click", () => {
-        let data = textResponse.innerHTML;
+        let data = textResponse.value;
         console.log(data);
         socket.emit("boxphoneTextSubmission", data);
         click.play();
@@ -331,8 +330,8 @@ boxphoneDraw = (prevText) => {
                     <div class="entryGroup">
                         <div class="popupHeader">Box Phone!</div>
                         <div class="popupSubheader">Previous player's description:</div>
-                        <p id="prevTextArea">This player didn't submit anything... Good luck!</p>
-                        <div class="popupSubheader">Draw your response and click submit before time runs out!</div>
+                        <div class="popupSubheader" id="prevTextArea">This player didn't submit anything... Good luck!</div>
+                        <div class="popupSubheader">Draw your response and click submit!</div>
                         <button id="boxphoneSubmitButton">Submit</button>
                     </div>
                     <div class="paintArea">
@@ -370,7 +369,7 @@ boxphoneDraw = (prevText) => {
     saveBtn.addEventListener("click", () => {
         let data = canvas.resizeAndExport(256, 256);
         console.log(data);
-        socket.emit("boxphoneDrawingSubmission", data);
+        socket.emit("boxphoneImageSubmission", data);
         click.play();
         document.getElementById("canvasScript").remove();
         clearPage()
@@ -385,7 +384,7 @@ boxphoneDraw = (prevText) => {
     unveil.play();
 }
 
-boxphoneResults = (textPrompts, imagePrompts) => {
+boxphoneResults = (data) => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
         `<div id="pageContent">
@@ -394,31 +393,30 @@ boxphoneResults = (textPrompts, imagePrompts) => {
                     <div class="entryGroup">
                         <div class="popupHeader">Box Phone!</div>
                         <div class="popupSubheader">The game is over, here are the results!</div>
-                        <div id="boxphoneResultsArea"></div>
+                        <div id="boxphoneResultsArea" style="text-align:center;"></div>
                     </div>
                 </div>
             </div>
         </div>`);
     document.querySelector('body').appendChild(setupPage);
-
-    /*
     // Display text, image, text, image
     const resultsArea = document.getElementById("boxphoneResultsArea");
 
-    const totalSubmissions = textPrompts.length + imagePrompts.length;
+    const dataArray = JSON.parse(data);
+    const totalSubmissions = dataArray.length;
+    let elem;
     for (let i = 0; i < totalSubmissions; i++) {
-        if (i % 2 === 0) { // even
-            let textResponse = textPrompt
-            let elem = document.createTextNode(textResponse)
-
+        if ((i % 2) == 0) { // even
+            let textResponse = dataArray[i];
+            elem = document.createTextNode(textResponse);
+            elem.className = "popupSubheader";
         } else { // odd
-            const imagePath = `data:image/png;base64,${prevImageData}`;
-            let elem = new Image();
+            const imagePath = `data:image/png;base64,${dataArray[i]}`;
+            elem = new Image();
             elem.src = imagePath;
         }
-        resultsArea.appendChild(img);
+        resultsArea.appendChild(elem);
     }
-    */
 }
 
 clearPage = () => {

@@ -3,6 +3,7 @@ import socketio
 import threading
 import base64
 import os
+import json
 
 from queue import Queue
 
@@ -21,6 +22,11 @@ class Host:
         self.image_prompts_q = image_prompts_q
         self.text_prompts_q = text_prompts_q
         self.vote_q = vote_q
+
+        #test and image prompts (lists)
+        self.prompts = []
+        # current player for boxphone
+        self.players_left = {}
 
         #intake queue
         self.msg_q = msg_q
@@ -58,6 +64,7 @@ class Host:
         self.players[sid] = f"Player {len(self.players) + 1}"
         self.printServerInfo()
 
+
     def disconnect(self, sid):
         print(f"Client {sid} ({self.players[sid]}) disconnected.")
         self.players.pop(sid)
@@ -79,6 +86,13 @@ class Host:
         self.players[sid] = data
         self.join_q.put({sid:data})
         self.printServerInfo()
+        # DEBUG CODE #
+        self.sio.emit("boxphoneWait")
+        self.players_left = dict(self.players)
+        if len(self.players) >= 3:
+            self.sio.emit("boxphoneFirstWrite", room=sid)
+            self.players_left.pop(sid)
+        # END DEBUG CODE #
         
     def drawingSubmission(self, sid, imageData, name):
         imageData = imageData.replace('data:image/png;base64,', '')
@@ -88,37 +102,52 @@ class Host:
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
 
-
     def boxphoneImageSubmission(self, sid, imageData):
-        # tell current player to wait and next player to start writing
-        self.sio.emit("boxphoneWait", room=sid)
-        next_sid = self.getNextSid(sid)
-        self.sio.emit("boxphoneWrite", imageData, room=next_sid)
+        imageData = imageData.replace('data:image/png;base64,', '')
+        print(f"Player {sid} submitted an image response")
+        self.prompts.append(imageData)
 
         # store image
-        imageData = imageData.replace('data:image/png;base64,', '')
         img_data = str.encode(imageData)
         path = os.path.join(os.curdir, f"images/boxphone_{sid}.png")
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))
         self.image_prompts_q.put({sid:path})
         print(f"Player {sid} submitted an image response")
+        # tell current player to wait and next player to start writing
+        self.sio.emit("boxphoneWait", room=sid)
+        next_sid = self.getNextSid()
+        if next_sid != 0:
+            self.sio.emit("boxphoneWrite", imageData, room=next_sid)
 
 
     def boxphoneTextSubmission(self, sid, text):
+        self.prompts.append(text)
+        # store text
+        self.text_prompts_q.put({sid: text})
+        print(f"Player {sid} submitted a text response")
         # tell current player to wait and next player to start drawing
         self.sio.emit("boxphoneWait", room=sid)
-        next_sid = self.getNextSid(sid)
-        self.sio.emit("boxphoneDraw", text, room=next_sid)
-
-        # store text
-        self.text_prompts_q.put({sid:text})
-        print(f"Player {sid} submitted a text response")
+        next_sid = self.getNextSid()
+        if next_sid != 0:
+            self.sio.emit("boxphoneDraw", text, room=next_sid)
 
 
-    def getNextSid(self, sid):
-        #TODO: return next player sid instead of passed in sid
+    def getNextSid(self):
+        # Get an sid, remove it, and return it
+        if len(self.players_left) == 0:
+            # Game is over, send results
+            self.boxphone_results()
+            return 0
+        sid = list(self.players_left.keys())[0]
+        self.players_left.pop(sid)
         return sid
+
+    def boxphone_results(self):
+        print("sending results")
+        json_str = json.dumps(self.prompts)
+        self.sio.emit("boxphoneResults", json_str)
+
 
     def drawingVote(self, sid, side):
         # TODO need to send 0 or 1 to game function
