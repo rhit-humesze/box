@@ -72,6 +72,21 @@ playerSetup = () => {
     socket.on("drawSomeVote", (option1, option2) => {
         drawSomeVote(option1, option2);
     });
+    socket.on("boxphoneWait", () => {
+        //boxphone();
+    });
+    socket.on("boxphoneFirstWrite", () => {
+        //boxphone();
+    });
+    socket.on("boxphoneWrite", (imagePrompt) => {
+        //boxphone();
+    });
+    socket.on("boxphoneDraw", (textPrompt) => {
+        //boxphone();
+    });
+    socket.on("boxphoneResults", (textPrompts, imagePrompts) => {
+        //boxphone();
+    });
     socket.on("timesUp", () => {
         timesUp.play();
         clearPage();

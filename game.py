@@ -17,7 +17,8 @@ lightColor = "#E6C25D"
 assetPath = 'client_website/public/assets/'
 
 class Game:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue, 
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue,
+                 image_prompts_q: Queue, text_prompts_q: Queue,
                  width=1200, height=800):
         '''initialize Game'''
         pygame.init()
@@ -30,6 +31,8 @@ class Game:
         self.code = code
         self.players = {}
         self.drawings = {}
+        self.text_prompts = {}
+        self.image_prompts = {}
 
         self._circle_cache = {}
         self.clock = pygame.time.Clock()
@@ -37,6 +40,9 @@ class Game:
 
         self.join_q = join_q
         self.disc_q = disc_q
+        self.draw_q = draw_q
+        self.image_prompts_q = image_prompts_q
+        self.text_prompts_q = text_prompts_q
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
@@ -168,6 +174,16 @@ class Game:
             img_dict_entry = self.draw_q.get()
             self.drawings.update(img_dict_entry)
 
+    def recv_image_prompts(self):
+        while not self.image_prompts_q.empty():
+            img_dict_entry = self.image_prompts_q.get()
+            self.image_prompts.update(img_dict_entry)
+
+    def recv_text_prompts(self):
+        while not self.text_prompts_q.empty():
+            text_dict_entry = self.text_prompts_q.get()
+            self.text_prompts.update(text_dict_entry)
+
     def check_disc_players(self):
         '''checks if a player has disconnected and removes them'''
         while not self.disc_q.empty():
@@ -257,6 +273,12 @@ class Game:
                 self.draw_some_tournament()
             elif self.game_state == "boxphone-play-screen":
                 print("Play boxphone game")
+                text = self.renderText("Submit a text or image prompt!", fontColor, 128, darkColor, 3)
+                text_rect = text.get_rect(center=(self.WIDTH / 2,100))
+                self.screen.blit(text, text_rect)
+                time_left = self.timer(45, (600,500), 400)
+                if time_left == 0:
+                    self.game_state = "boxphone-results-screen"
             elif self.game_state == "boxphone-results-screen":
                 print("Display boxphone game results")
             else:

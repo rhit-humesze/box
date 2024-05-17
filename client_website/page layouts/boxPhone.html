@@ -13,25 +13,33 @@
 <div id="pageContent">
     <div class="RHpopup">
         <div id="headerGroup">
-            <div class="popupHeader">BoxPhone</div>
-            <div id="boxPhoneInstructions" class="popupSubheader">Please wait for your turn:</div>
-            <!-- Possible Instructions (change innerHTML): -->
-            <!-- Please wait for your turn: -->
-            <!-- Please enter a starting text prompt: -->
-            <!-- Please draw what the text says: -->
-            <!-- Please describe the drawing: -->
+            <div class="entryGroup">
+                <div class="popupHeader">BoxPhone!</div>
+                <div id="boxPhoneInstructions" class="popupSubheader">Please wait for your turn:</div>
+                <!-- Possible Instructions (change innerHTML): -->
+                <!-- Please wait for your turn: -->
+                <!-- Please enter a starting text prompt: -->
+                <!-- Please draw what the text says: -->
+                <!-- Please describe the drawing: -->
+                <div class="popupSubheader">Make sure to click submit before time runs out!</div>
+                <button id="boxphoneSubmitButton">Submit</button>
+                <!--<input type="file" id="imageResponse" name="imageResponse" accept="image/png, image/jpeg" />-->
+                <input id="textResponse" maxlength="100" spellcheck="false" placeholder="(Ex: A bird feeding it's chicks)" style='font-size:100%;width:clamp(8rem,50vw,30rem) !important' />
+                <div id="previousPrompt"></div>
+                <div id="paintArea">
+                    <!-- <div id="drawing-widget" width="320" height="256"> -->
+                    <!-- Courtesy of https://github.com/jjjreisss/drawing-widget?tab=readme-ov-file -->
+                    <!-- <script src="../public/scripts/drawingWidget.js"></script> -->
+                </div>
+            </div>
+            <div class="boxPhoneResults">
+                <!-- Results of the game will be displayed here -->
+            </div>
         </div>
-        <div class="entryGroup">
-            <input id="textResponse" maxlength="100" spellcheck="false" placeholder="(Ex: A bird feeding it's chicks)" style='font-size:100%;width:clamp(8rem,50vw,30rem) !important' />
-            <input type="file" id="imageResponse" name="imageResponse" accept="image/png, image/jpeg" />
-            <button id="submitMessage">Submit</button>
-        </div>
-        <div class="boxPhoneResults">
-            <!-- Results of the game will be displayed here -->
-        </div>
+
+        <script src="scripts/boxphone.js"></script>
     </div>
 </div>
-<script src="scripts/boxphone.js"></script>
 <script src="scripts/main.js"></script>
 </body>
 </html>

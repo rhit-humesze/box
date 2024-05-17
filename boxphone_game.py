@@ -5,7 +5,6 @@ class BoxphoneGame:
         self.players = players
         self.player_order = []
         self.randomize_player_order()
-        self.seed = random.randint(0, len(players))
         self.text_prompts = []  # ascii text
         self.image_prompts = []  # png or jpg
 

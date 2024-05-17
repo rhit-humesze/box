@@ -4,7 +4,8 @@ import socketio
 from queue import Queue
 
 class Host:
-    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue):
+    def __init__(self, code, join_q: Queue, disc_q: Queue, draw_q: Queue,
+                 image_prompts_q: Queue, text_prompts_q: Queue):
         self.sio = socketio.Server(cors_allowed_origins="*")
         self.app = socketio.WSGIApp(self.sio)
         self.players = {}
@@ -13,6 +14,8 @@ class Host:
         self.join_q = join_q
         self.disc_q = disc_q
         self.draw_q = draw_q
+        self.image_prompts_q = image_prompts_q
+        self.text_prompts_q = text_prompts_q
         
         # init events
         self.sio.event(self.connect)
