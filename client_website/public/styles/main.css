@@ -13,6 +13,27 @@ body {
     background-image: url("../assets/box_tile.png");
 }
 
+.NHpopup {
+    background-image: url("../assets/box_panel.png");
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 15px;
+    min-width: 60vw;
+    min-height: 60vh;
+    padding: 5vh 5vw;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: solid var(--dark-color) 1vh;
+    filter: drop-shadow(var(--dark-color) 0px 0px 10px);
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: column;
+}
+
 .LHpopup {
     background-image: url("../assets/box_panel_shred_l.png"), url("../assets/box_panel.png");
     background-position: left top, center top;
