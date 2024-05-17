@@ -399,7 +399,7 @@ class Game:
                     self.left_occupied = False
 
         # (len(self.drawing_votes) == len(self.players))
-        if (self.round_time <= 0):
+        if (self.round_time < 0):
             if not self.start_ticks_lock:
                 #send msg that round is over
                 self.msg_q.put(1)
