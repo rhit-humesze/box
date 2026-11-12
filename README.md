@@ -12,3 +12,6 @@ Contains the Game class that handles all of the game logic.
 
 ## host.py
 Contains the Host class which spawns the asgi server. Contains logic for broadcasting soi signals.
+
+# webpage: https://bocks-d6c5c.web.app/
+To allow connecting to a server on same network, visit https://IP-ADDRESS:5100 and click advanced -> proceed
