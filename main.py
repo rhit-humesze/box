@@ -6,7 +6,6 @@ from queue import Queue
 
 from host import Host
 from game import Game
-from models import DrawingData
 
 def start_server(code: str, join_q: Queue, disc_q: Queue, draw_q: Queue, vote_q: Queue, msg_q: Queue):
     host = Host(code, join_q, disc_q, draw_q, vote_q, msg_q)
@@ -24,11 +23,11 @@ if __name__ == "__main__":
     vote_q = Queue()
     msg_q = Queue()
     shared_args = [code, join_q, disc_q, draw_q, vote_q, msg_q]
-    server_thread = threading.Thread(target=start_server, args=shared_args)
-    game_thread = threading.Thread(target=start_game, args=shared_args)
 
+    # The server runs in a daemon thread so it dies with the program.
+    server_thread = threading.Thread(target=start_server, args=shared_args, daemon=True)
     server_thread.start()
-    game_thread.start()
 
-    server_thread.join()
-    game_thread.join()
+    # pygame runs on the main thread (required on macOS, safer everywhere).
+    # Closing the window ends game_loop -> sys.exit(), which now ends the whole program.
+    start_game(*shared_args)

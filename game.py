@@ -1,11 +1,8 @@
 import pygame
-import random
 import sys
-import string
 from queue import Queue
 from typing import Tuple
 
-from host import Host
 from models import DrawingData
 
 highlightColor = "#88BABA"
@@ -56,6 +53,9 @@ class Game:
         self.draw_some_winner = DrawingData('test_img3.png', 'test3', 'big kimmy j')
 
         self._circle_cache = {}
+        self._font_cache = {}
+        self._image_cache = {}
+        self._bg_surface = None
         self.clock = pygame.time.Clock()
         self.start_ticks = 0
 
@@ -71,7 +71,6 @@ class Game:
     
     # font outlining provided by https://stackoverflow.com/questions/54363047/how-to-draw-outline-on-the-fontpygame
     def _circlepoints(self, r):
-        self._circle_cache = {}
         r = int(round(r))
         if r in self._circle_cache:
             return self._circle_cache[r]
@@ -91,8 +90,27 @@ class Game:
         points.sort()
         return points
 
+    def _get_font(self, size):
+        '''SysFont lookups are slow, so build each size once and reuse it'''
+        font = self._font_cache.get(size)
+        if font is None:
+            font = pygame.font.SysFont("lucida console", size)
+            self._font_cache[size] = font
+        return font
+
+    def _load_image(self, path, dimensions=None):
+        '''load (and optionally scale) an image from disk once, then reuse it every frame'''
+        key = (path, dimensions)
+        image = self._image_cache.get(key)
+        if image is None:
+            image = pygame.image.load(path).convert_alpha()
+            if dimensions is not None:
+                image = pygame.transform.scale(image, dimensions)
+            self._image_cache[key] = image
+        return image
+
     def renderText(self, text, textcolor, textsize, outlinecolor, outlinewidth):
-        font = pygame.font.SysFont("lucida console", textsize)
+        font = self._get_font(textsize)
         textsurface = font.render(text, True, pygame.Color(textcolor)).convert_alpha()
         w = textsurface.get_width() + 2 * outlinewidth
         h = font.get_height()
@@ -123,7 +141,7 @@ class Game:
                         if len(self.players) >= 3 and self.check_within_bounds((800,100),(280,120), mouse_x, mouse_y, "topleft"):
                             self.game_state = 'select-screen'
                     elif self.game_state == 'select-screen':
-                        if self.check_within_bounds((300,400),(280,120), mouse_x, mouse_y, "center"):
+                        if self.check_within_bounds((self.WIDTH / 2, 400),(280,120), mouse_x, mouse_y, "center"):
                             self.start_ticks = pygame.time.get_ticks()
                             #send msg to host
                             self.msg_q.put(0)
@@ -203,7 +221,7 @@ class Game:
         '''checks if a player has disconnected and removes them'''
         while not self.disc_q.empty():
             sid = self.disc_q.get()
-            self.players.pop(sid)
+            self.players.pop(sid, None)
 
     def game_loop(self):
         '''main loop for the game screen'''
@@ -262,8 +280,7 @@ class Game:
                     self.screen.blit(player_text, player_rect)
                     x_pos += player_rect.width + horizontal_spacing
             elif self.game_state == 'select-screen':
-                self.create_button((300,400),(280,80),text="Draw Some", method="center",font_size=32)
-                self.create_button((900,400),(280,80),text="Box Phone", method="center",font_size=32)
+                self.create_button((self.WIDTH / 2, 400),(280,80),text="Draw Some", method="center",font_size=32)
             elif self.game_state == 'draw-some-screen':
                 if(not self.newMusic):
                     pygame.mixer.music.stop()
@@ -275,7 +292,9 @@ class Game:
                 self.screen.blit(text, text_rect)
                 time_left = self.timer(120, (600,500), 400)
                 self.recv_drawings()
-                if time_left == 0:
+                self.check_disc_players()
+                all_submitted = len(self.players) > 0 and all(sid in self.drawings for sid in self.players)
+                if time_left <= 0 or all_submitted:
                     self.msg_q.put(1)
                     self.game_state = "draw-some-tournament-screen"
                     self.newMusic = False
@@ -311,7 +330,14 @@ class Game:
 
 
     def draw_some_tournament(self):
-        if(len(self.drawings) == 1):
+        if len(self.drawings) == 0:
+            print("No drawings were submitted. Returning to game select.")
+            self.game_state = 'select-screen'
+            return
+
+        if len(self.drawings) == 1:
+            # the lone survivor is the winner (also covers only one drawing being submitted)
+            self.draw_some_winner = next(iter(self.drawings.values()))
             self.msg_q.put(self.draw_some_winner.image)
             self.game_state = "draw-some-won-screen"
             self.newMusic = False
@@ -461,8 +487,7 @@ class Game:
 
 
     def render_drawing(self, image_path, coords, dimensions):
-        image = pygame.image.load(image_path)
-        image = pygame.transform.scale(image, dimensions)
+        image = self._load_image(image_path, tuple(dimensions))
         image_rect = image.get_rect(center=coords)
         self.screen.blit(image, image_rect)
 
@@ -473,16 +498,20 @@ class Game:
 
 
     def fillWindowBg(self):
-        self.screen.fill(pygame.Color(medColor))
-        bgTile = pygame.image.load(assetPath + 'box_tile.png')
-        bgTile_w, bgTile_h = bgTile.get_size()
-        for x in range(0, self.WIDTH, bgTile_w):
-            for y in range(0, self.HEIGHT, bgTile_h):
-                self.screen.blit(bgTile, (x, y))
+        if self._bg_surface is None:
+            # build the tiled background once, then it is a single blit per frame
+            surf = pygame.Surface((self.WIDTH, self.HEIGHT))
+            surf.fill(pygame.Color(medColor))
+            bgTile = self._load_image(assetPath + 'box_tile.png')
+            bgTile_w, bgTile_h = bgTile.get_size()
+            for x in range(0, self.WIDTH, bgTile_w):
+                for y in range(0, self.HEIGHT, bgTile_h):
+                    surf.blit(bgTile, (x, y))
+            self._bg_surface = surf
+        self.screen.blit(self._bg_surface, (0, 0))
 
 
     def createPanelBg(self, xpos, ypos, width, height, outlinewidth):
         pygame.draw.rect(self.screen, pygame.Color(darkColor), (xpos, ypos, width, height))
-        panelBg = pygame.image.load(assetPath + 'box_panel.png')
-        panelBg = pygame.transform.scale(panelBg, (width + xpos, height + ypos))
+        panelBg = self._load_image(assetPath + 'box_panel.png', (width + xpos, height + ypos))
         self.screen.blit(panelBg, (xpos + outlinewidth, ypos + outlinewidth), (xpos + outlinewidth, ypos + outlinewidth, width - 2 * outlinewidth, height - 2 * outlinewidth))

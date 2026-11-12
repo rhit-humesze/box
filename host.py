@@ -66,6 +66,9 @@ class Host:
 
     def start_server(self):
         os.makedirs("images", exist_ok=True)
+        if not os.environ.get("NO_TLS") and not (os.path.exists('./host.cert') and os.path.exists('./host.key')):
+            raise FileNotFoundError("host.cert / host.key not found. Create them (e.g. with mkcert) "
+                                    "or set NO_TLS=1 when running behind a tunnel.")
         sock = eventlet.listen(('0.0.0.0', 5100))
         if not os.environ.get("NO_TLS"):
             sock = eventlet.wrap_ssl(sock, certfile='./host.cert',
@@ -107,17 +110,26 @@ class Host:
     def drawingSubmission(self, sid, imageData, name):
         if sid not in self.players:
             return
-        safe = re.sub(r'[^A-Za-z0-9_]', '_', name)[:20]
+        if not isinstance(imageData, str) or not isinstance(name, str):
+            return
+        name = name[:20]
+        try:
+            raw = base64.b64decode(imageData.replace('data:image/png;base64,', ''), validate=True)
+        except Exception:
+            return
+        if not raw.startswith(b'\x89PNG\r\n\x1a\n'):
+            return  # not a PNG; don't write it or let pygame try to load it
+        safe = re.sub(r'[^A-Za-z0-9_]', '_', name)
         filepath = f"images/{sid}_{safe}.png"
-        imageData = imageData.replace('data:image/png;base64,', '')
-        img_data = str.encode(imageData)
         path = os.path.join(os.curdir, filepath)
         with open(path, "wb") as fh:
-            fh.write(base64.decodebytes(img_data))
+            fh.write(raw)
         drawing = DrawingData(filepath, name, self.players[sid])
         self.draw_q.put({sid: drawing})
-    
+
     def drawingVote(self, sid, side):
+        if sid not in self.players:
+            return
         if side == "left":
             self.vote_q.put({sid: int(0)})
         else:
