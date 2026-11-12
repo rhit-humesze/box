@@ -45,7 +45,7 @@ codeEntry = () => {
         clickable = false;
         console.log(boxCode);
         click.play();
-        var serverLobby = "https://" + "137.112.226.133" + ":5100/"
+        var serverLobby = "https://" + prompt("Enter server IP:") + ":5100/"
         socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
         socket.on("connect_error", (error) => {
             socket.close()
