@@ -2,6 +2,7 @@ import eventlet
 import socketio
 import base64
 import os
+import re
 from models import DrawingData
 from queue import Queue
 
@@ -64,10 +65,12 @@ class Host:
             eventlet.sleep(0.1)  # Sleep briefly to prevent a tight loop
 
     def start_server(self):
-        self.server = eventlet.wrap_ssl(eventlet.listen(('', 5100)), 
-                                        certfile='./host.cert', 
-                                        keyfile='./host.key', 
-                                        server_side=True)
+        os.makedirs("images", exist_ok=True)
+        sock = eventlet.listen(('0.0.0.0', 5100))
+        if not os.environ.get("NO_TLS"):
+            sock = eventlet.wrap_ssl(sock, certfile='./host.cert',
+                                    keyfile='./host.key', server_side=True)
+        self.server = sock
         eventlet.wsgi.server(self.server, self.app, log_output=False)
 
     def printServerInfo(self):
@@ -79,8 +82,9 @@ class Host:
         self.printServerInfo()
 
     def disconnect(self, sid):
-        print(f"Client {sid} ({self.players[sid]}) disconnected.")
-        if(self.players.pop(sid, None) != None):
+        name = self.players.pop(sid, None)
+        print(f"Client {sid} ({name}) disconnected.")
+        if name is not None:
             self.disc_q.put(sid)
         self.printServerInfo()
 
@@ -101,9 +105,12 @@ class Host:
         self.printServerInfo()
         
     def drawingSubmission(self, sid, imageData, name):
+        if sid not in self.players:
+            return
+        safe = re.sub(r'[^A-Za-z0-9_]', '_', name)[:20]
+        filepath = f"images/{sid}_{safe}.png"
         imageData = imageData.replace('data:image/png;base64,', '')
         img_data = str.encode(imageData)
-        filepath = f"images/{sid}_{name.replace(' ','_')}.png"
         path = os.path.join(os.curdir, filepath)
         with open(path, "wb") as fh:
             fh.write(base64.decodebytes(img_data))

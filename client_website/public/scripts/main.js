@@ -20,6 +20,14 @@ window.onload = () => {
     codeEntry()
 }
 
+function buildServerUrl(input) {
+    input = input.trim();
+    if (/^https?:\/\//.test(input)) return input;
+    const isLocal = /^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|100\.)/.test(input);
+    if (isLocal) return `https://${input}${input.includes(":") ? "" : ":5100"}/`;
+    return `https://${input}/`;
+}
+
 codeEntry = () => {
     document.querySelector('#pageContent').remove();
     var setupPage = htmlToElement(
@@ -42,17 +50,19 @@ codeEntry = () => {
         if(boxCode == "" || !clickable) {
             return;
         }
+        var raw = prompt("Enter server address:");
+        if (!raw) return;
         clickable = false;
         console.log(boxCode);
         click.play();
-        var serverLobby = "https://" + prompt("Enter server IP:") + ":5100/"
-        socket = io.connect(`${serverLobby}`, {rejectUnauthorized: false});
+        var serverLobby = buildServerUrl(raw);
+        socket = io(serverLobby, { transports: ["websocket"], forceNew: true });
         socket.on("connect_error", (error) => {
             socket.close()
             clickable = true;
             timesUp.play();
             document.getElementById("boxCode").value = "";
-            var errorMsg = htmlToElement(`<div class="popupError">Box Code invalid! Try again.</div>`);
+            var errorMsg = htmlToElement(`<div class="popupError">Couldn't reach the server. Check the address and try again.</div>`);
             document.getElementById("headerGroup").appendChild(errorMsg);
             setTimeout(() => errorMsg.style.opacity = '0', 1000);
             setTimeout(() => errorMsg.remove(), 2000);
@@ -83,7 +93,6 @@ playerSetup = () => {
     socket.on("connect_error", (error) => {});
     socket.io.on("reconnect_failed", () => {
         socket.close()
-        console.log(error.message);
         timesUp.play()
         codeEntry()
     });
